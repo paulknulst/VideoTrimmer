@@ -6,7 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
-abstract class PermActivity : AppCompatActivity(){
+abstract class PermActivity : AppCompatActivity() {
 
     lateinit var doThis: () -> Unit
     protected fun setupPermissions(doSomething: () -> Unit) {

@@ -20,8 +20,8 @@ android {
     }
 }
 
-repositories{
-    flatDir{ dirs 'libs' }
+repositories {
+    flatDir { dirs 'libs' }
     maven { url 'https://jitpack.io' }
 }
 

@@ -7,7 +7,6 @@ import android.net.Uri
 import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
-import androidx.annotation.LayoutRes
 import com.video.editor.interfaces.OnCommandVideoListener
 
 abstract class BaseCommandActivity() : PermActivity(),
@@ -41,13 +40,13 @@ abstract class BaseCommandActivity() : PermActivity(),
             mediaMetadataRetriever.setDataSource(this, uri)
             val duration =
                 mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
-                    .toLong()
+                    ?.toLong()
             val width =
                 mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)
-                    .toLong()
+                    ?.toLong()
             val height =
                 mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)
-                    .toLong()
+                    ?.toLong()
             val values = ContentValues()
             values.put(MediaStore.Video.Media.DATA, uri.path)
             values.put(MediaStore.Video.VideoColumns.DURATION, duration)
@@ -57,7 +56,7 @@ abstract class BaseCommandActivity() : PermActivity(),
                 contentResolver.insert(
                     MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
                     values
-                )
+                )!!
             )
             Log.e("VIDEO ID", id.toString())
         }

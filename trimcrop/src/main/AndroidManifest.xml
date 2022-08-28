@@ -24,10 +24,10 @@
                 android:resource="@xml/provider_paths" />
         </provider>
 
-        <activity android:name="com.video.trimcrop.MainActivity">
+        <activity android:name="com.video.trimcrop.MainActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

@@ -15,8 +15,9 @@ class CropperActivity : BaseCommandActivity() {
         setupPermissions {
             val extraIntent = intent
             var path = ""
-            if (extraIntent != null) path =
-                extraIntent.getStringExtra(MainActivity.EXTRA_VIDEO_PATH)
+            if (extraIntent != null) {
+                path = extraIntent.getStringExtra(MainActivity.EXTRA_VIDEO_PATH)!!
+            }
             videoCropper.setVideoURI(Uri.parse(path))
                 .setOnCommandVideoListener(this)
                 .setMinMaxRatios(0.3f, 3f)

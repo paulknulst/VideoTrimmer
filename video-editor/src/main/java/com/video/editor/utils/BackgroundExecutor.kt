@@ -1,7 +1,6 @@
 package com.video.editor.utils
 
 import android.util.Log
-import java.util.ArrayList
 import java.util.concurrent.*
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.max
