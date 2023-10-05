@@ -17,6 +17,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.SeekBar
+import com.arthenica.mobileffmpeg.FFmpeg
 import com.video.editor.R
 import com.video.editor.interfaces.OnCommandVideoListener
 import com.video.editor.interfaces.OnProgressVideoListener
@@ -146,6 +147,21 @@ class VideoTrimmer @JvmOverloads constructor(
         video_loader.pause()
         icon_video_play.visibility = View.VISIBLE
         notifyProgressUpdate(false)
+    }
+
+    fun setTrimRange(inputPath: String, outputPath: String, startTime: Long, endTime: Long) {
+        val startTimeFormatted = convertTimestampToString(startTime)
+        val endTimeFormatted = convertTimestampToString(endTime)
+        val command = arrayOf("-y", "-i", inputPath, "-ss", startTimeFormatted, "-to", endTimeFormatted, "-c", "copy", outputPath)
+        FFmpeg.execute(command)
+    }
+
+    private fun convertTimestampToString(timeInMs: Long): String {
+        val totalSeconds = (timeInMs / 1000).toInt()
+        val seconds = totalSeconds % 60
+        val minutes = totalSeconds / 60 % 60
+        val hours = totalSeconds / 3600
+        return String.format("%02d:%02d:%02d", hours, minutes, seconds)
     }
 
     private fun onPlayerIndicatorSeekStop(seekBar: SeekBar) {

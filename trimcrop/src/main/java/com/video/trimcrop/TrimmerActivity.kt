@@ -45,8 +45,11 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
                 for (i in 0 until numberOfSegments) {
                     val startTime = i * segmentDuration
                     val endTime = startTime + segmentDuration
-//                    videoTrimmer.setTrimRange(startTime, endTime)
-                    videoTrimmer.save()
+                    val outputPath = Environment.getExternalStorageDirectory()
+                        .toString() + File.separator + "TrimCrop" + File.separator + "segment_$i.mp4"
+                    videoTrimmer.setTrimRange(path, outputPath, startTime.toLong(),
+                        endTime.toLong()
+                    )
                 }
             }
         }
