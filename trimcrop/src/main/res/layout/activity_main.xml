@@ -4,14 +4,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     android:padding="16dp">
 
     <FrameLayout
         android:id="@+id/trimmerButton"
         android:layout_width="@dimen/_70sdp"
         android:layout_height="@dimen/_70sdp"
-        android:layout_marginStart="@dimen/_10sdp"
         android:background="@drawable/background_button">
 
         <ImageView
@@ -23,4 +22,14 @@
             tools:ignore="ContentDescription" />
     </FrameLayout>
 
+    <EditText
+        android:id="@+id/segmentLengthInput"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_5sdp"
+        android:inputType="number"
+        android:textAlignment="center"
+        android:hint="Segment length (5-60)"
+        android:ems="5"
+        android:text="10" />
 </LinearLayout>

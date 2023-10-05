@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.widget.EditText
 import android.widget.Toast
 import com.video.editor.utils.FileUtils
 import kotlinx.android.synthetic.main.activity_main.*
@@ -50,8 +51,12 @@ class MainActivity : PermActivity() {
     }
 
     private fun startTrimActivity(uri: Uri) {
+        val segmentLengthInput = findViewById<EditText>(R.id.segmentLengthInput)
+        val segmentLength = segmentLengthInput.text.toString().toInt()
+
         val intent = Intent(this, TrimmerActivity::class.java)
         intent.putExtra(EXTRA_VIDEO_PATH, FileUtils.getPath(this, uri))
+        intent.putExtra("segmentLength", segmentLength)
         startActivity(intent)
     }
 
