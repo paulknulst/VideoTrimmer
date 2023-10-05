@@ -25,8 +25,8 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
                 .setOnVideoListener(this)
                 .setVideoURI(Uri.parse(path))
                 .setVideoInformationVisibility(true)
-                .setMaxDuration(10)
-                .setMinDuration(2)
+                .setMaxDuration(60)
+                .setMinDuration(5)
                 .setDestinationPath(
                     Environment.getExternalStorageDirectory()
                         .toString() + File.separator + "TrimCrop" + File.separator

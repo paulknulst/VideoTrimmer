@@ -14,7 +14,6 @@ class MainActivity : PermActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         trimmerButton.setOnClickListener { pickFromGallery(REQUEST_VIDEO_TRIMMER) }
-        cropperButton.setOnClickListener { pickFromGallery(REQUEST_VIDEO_CROPPER) }
     }
 
     private fun pickFromGallery(intentCode: Int) {
@@ -45,17 +44,6 @@ class MainActivity : PermActivity() {
                         Toast.LENGTH_SHORT
                     ).show()
                 }
-            } else if (requestCode == REQUEST_VIDEO_CROPPER) {
-                val selectedUri = data!!.data
-                if (selectedUri != null) {
-                    startCropActivity(selectedUri)
-                } else {
-                    Toast.makeText(
-                        this@MainActivity,
-                        R.string.toast_cannot_retrieve_selected_video,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
             }
         }
         super.onActivityResult(requestCode, resultCode, data)
@@ -67,15 +55,8 @@ class MainActivity : PermActivity() {
         startActivity(intent)
     }
 
-    private fun startCropActivity(uri: Uri) {
-        val intent = Intent(this, CropperActivity::class.java)
-        intent.putExtra(EXTRA_VIDEO_PATH, FileUtils.getPath(this, uri))
-        startActivity(intent)
-    }
-
     companion object {
         private const val REQUEST_VIDEO_TRIMMER = 0x01
-        private const val REQUEST_VIDEO_CROPPER = 0x02
         internal const val EXTRA_VIDEO_PATH = "EXTRA_VIDEO_PATH"
     }
 
