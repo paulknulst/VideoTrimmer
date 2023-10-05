@@ -11,9 +11,12 @@ import java.io.File
 
 class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
 
+    private var segmentLengthInSeconds: Int = 10
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_trimmer)
+
+        segmentLengthInSeconds = intent?.getIntExtra("segmentLength", 10) ?: 10
 
         setupPermissions {
             val extraIntent = intent
@@ -22,7 +25,7 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
                 path = extraIntent.getStringExtra(MainActivity.EXTRA_VIDEO_PATH)!!
             }
             val videoDuration = getVideoDuration(path) // Get the video duration
-            val segmentDuration = 10_000 // 10 seconds in milliseconds
+            val segmentDuration = segmentLengthInSeconds * 1000 // Convert segment length to milliseconds
             val numberOfSegments = (videoDuration / segmentDuration).toInt()
 
             videoTrimmer
