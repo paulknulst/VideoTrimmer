@@ -102,10 +102,10 @@ class VideoCropper @JvmOverloads constructor(
         mediaMetadataRetriever.setDataSource(context, fileUri)
         videoWidth =
             mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)
-                .toInt()
+                ?.toInt()!!
         videoHeight =
             mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)
-                .toInt()
+                ?.toInt()!!
         return this
     }
 

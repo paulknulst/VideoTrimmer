@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.widget.EditText
 import android.widget.Toast
+import com.google.android.gms.ads.MobileAds
 import com.video.editor.utils.FileUtils
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -15,6 +16,8 @@ class MainActivity : PermActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         trimmerButton.setOnClickListener { pickFromGallery(REQUEST_VIDEO_TRIMMER) }
+
+        MobileAds.initialize(this) {}
     }
 
     private fun pickFromGallery(intentCode: Int) {

@@ -7,6 +7,12 @@ import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import android.widget.Toast
+import com.google.android.gms.ads.AdError
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.FullScreenContentCallback
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd
+import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAdLoadCallback
 import com.video.editor.interfaces.OnVideoListener
 import kotlinx.android.synthetic.main.activity_trimmer.back
 import kotlinx.android.synthetic.main.activity_trimmer.save
@@ -16,9 +22,26 @@ import java.io.File
 class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
 
     private var segmentLengthInSeconds: Int = 10
+    private lateinit var rewardedInterstitialAd: RewardedInterstitialAd
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_trimmer)
+
+        val adRequest = AdRequest.Builder().build()
+        RewardedInterstitialAd.load(
+            this,
+            "ca-app-pub-3940256099942544/5354046379",
+            adRequest,
+            object : RewardedInterstitialAdLoadCallback() {
+                override fun onAdLoaded(ad: RewardedInterstitialAd) {
+                    rewardedInterstitialAd = ad
+                }
+
+                override fun onAdFailedToLoad(loadAdError: LoadAdError) {
+                    // Handle the error
+                }
+            }
+        )
 
         segmentLengthInSeconds = intent?.getIntExtra("segmentLength", 10) ?: 10
 
@@ -47,6 +70,29 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
             }
 
             save.setOnClickListener {
+                if (::rewardedInterstitialAd.isInitialized) {
+                    rewardedInterstitialAd.fullScreenContentCallback = object : FullScreenContentCallback() {
+                        override fun onAdDismissedFullScreenContent() {
+                            // Continue with the save operation after the ad is dismissed
+                            //proceedWithSaveOperation()
+                        }
+
+//                        override fun onAdFailedToShowFullScreenContent(adError: AdError?) {
+//                            // Handle the error and continue with the save operation
+//                            //proceedWithSaveOperation()
+//                        }
+
+                        override fun onAdShowedFullScreenContent() {
+                            // Ad is being shown
+                        }
+                    }
+                    rewardedInterstitialAd.show(this) { rewardItem ->
+                        // Handle the reward
+                        Toast.makeText(this, "Reward: ${rewardItem.amount} ${rewardItem.type}", Toast.LENGTH_LONG).show()
+                        // Now you could proceed with the save operation
+                        // proceedWithSaveOperation()
+                    }
+                }
                 val videoDuration = getVideoDuration(path)
                 val segmentDuration = segmentLengthInSeconds * 1000
                 val numberOfSegments = (videoDuration / segmentDuration).toInt()
