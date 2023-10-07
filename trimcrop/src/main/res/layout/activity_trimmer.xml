@@ -36,7 +36,7 @@
             android:padding="@dimen/_10sdp"
             android:text="SAVE"
             android:textAllCaps="true"
-            android:textColor="#efc43b"
+            android:textColor="@color/buttonColor"
             android:textSize="@dimen/_13sdp" />
 
     </RelativeLayout>
