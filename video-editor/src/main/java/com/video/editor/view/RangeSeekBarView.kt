@@ -97,8 +97,6 @@ class RangeSeekBarView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        drawShadow(canvas)
-        drawThumbs(canvas)
     }
 
     @SuppressLint("ClickableViewAccessibility")
