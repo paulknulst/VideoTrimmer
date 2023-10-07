@@ -75,43 +75,106 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent">
 
-            <TextView
-                android:paddingVertical="2dp"
-                android:textColor="@color/textColor"
-                android:id="@+id/step1"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="1) Input a number 5-60, this will be the length of each video segment in seconds"
-                android:textSize="16sp" />
+                android:orientation="horizontal"
+                android:paddingVertical="2dp">
 
-            <TextView
-                android:paddingVertical="2dp"
-                android:textColor="@color/textColor"
-                android:id="@+id/step2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="2) Click on the plus button to select a video."
-                android:textSize="16sp" />
-            <TextView
-                android:paddingVertical="2dp"
-                android:textColor="@color/textColor"
-                android:id="@+id/step3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="3) Once the video is selected, you will be able to preview the selected video"
-                android:textSize="16sp" />
-            <!-- ... Other TextView
-            android:paddingVertical="2dp"
-             android:textColor="@color/textColor" elements follow a similar pattern ... -->
+                <TextView
+                    android:layout_marginEnd="@dimen/_5sdp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1."
+                    android:textColor="@color/textColor"
+                    android:textSize="16sp" />
 
-            <TextView
-                android:paddingVertical="2dp"
-                android:textColor="@color/textColor"
-                android:id="@+id/step4"
-                android:layout_width="wrap_content"
+                <TextView
+                    android:id="@+id/step1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Input a number 5-60, this will be the length of each video segment in seconds"
+                    android:textColor="@color/textColor"
+                    android:textSize="16sp" />
+
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="4) Click save, and the video will be saved into smaller segments (original video will not be deleted)"
-                android:textSize="16sp" />
+                android:orientation="horizontal"
+                android:paddingVertical="2dp">
+
+                <TextView
+                    android:layout_marginEnd="@dimen/_5sdp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2."
+                    android:textColor="@color/textColor"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/step2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Click on the plus button to select a video."
+                    android:textColor="@color/textColor"
+                    android:textSize="16sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingVertical="2dp">
+
+                <TextView
+                    android:layout_marginEnd="@dimen/_5sdp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="3."
+                    android:textColor="@color/textColor"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/step3"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Once the video is selected, you will be able to preview the selected video"
+                    android:textColor="@color/textColor"
+                    android:textSize="16sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingVertical="2dp">
+
+                <TextView
+                    android:layout_marginEnd="@dimen/_5sdp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="4."
+                    android:textColor="@color/textColor"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/step4"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Click save, and the video will be saved into smaller segments (original video will not be deleted)"
+                    android:textColor="@color/textColor"
+                    android:textSize="16sp" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
