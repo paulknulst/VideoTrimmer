@@ -28,10 +28,6 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
             if (extraIntent != null) {
                 path = extraIntent.getStringExtra(MainActivity.EXTRA_VIDEO_PATH)!!
             }
-            val videoDuration = getVideoDuration(path) // Get the video duration
-            val segmentDuration =
-                segmentLengthInSeconds * 1000 // Convert segment length to milliseconds
-            val numberOfSegments = (videoDuration / segmentDuration).toInt()
 
 
             videoTrimmer
@@ -77,10 +73,10 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
                 val remainingTime = videoDuration - (numberOfSegments * segmentDuration)
                 if (remainingTime > 0) {
                     val startTime = numberOfSegments * segmentDuration
-                    val endTime = videoDuration
+                    //video duration is the same as endTime
                     val outputPath = Environment.getExternalStorageDirectory()
                         .toString() + File.separator + "TrimCrop" + File.separator + "segment_$numberOfSegments.mp4"
-                    videoTrimmer.setTrimRange(path, outputPath, startTime.toLong(), endTime.toLong())
+                    videoTrimmer.setTrimRange(path, outputPath, startTime.toLong(), videoDuration)
 
                     // Notify the MediaStore about the new file
                     MediaScannerConnection.scanFile(
