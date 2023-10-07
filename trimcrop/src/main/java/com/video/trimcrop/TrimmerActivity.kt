@@ -6,7 +6,9 @@ import android.os.Bundle
 import android.os.Environment
 import android.widget.Toast
 import com.video.editor.interfaces.OnVideoListener
-import kotlinx.android.synthetic.main.activity_trimmer.*
+import kotlinx.android.synthetic.main.activity_trimmer.back
+import kotlinx.android.synthetic.main.activity_trimmer.save
+import kotlinx.android.synthetic.main.activity_trimmer.videoTrimmer
 import java.io.File
 
 class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
@@ -25,8 +27,10 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
                 path = extraIntent.getStringExtra(MainActivity.EXTRA_VIDEO_PATH)!!
             }
             val videoDuration = getVideoDuration(path) // Get the video duration
-            val segmentDuration = segmentLengthInSeconds * 1000 // Convert segment length to milliseconds
+            val segmentDuration =
+                segmentLengthInSeconds * 1000 // Convert segment length to milliseconds
             val numberOfSegments = (videoDuration / segmentDuration).toInt()
+
 
             videoTrimmer
                 .setOnCommandListener(this)
@@ -45,6 +49,10 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
             }
 
             save.setOnClickListener {
+                val videoDuration = getVideoDuration(path)
+                val segmentDuration = segmentLengthInSeconds * 1000
+                val numberOfSegments = (videoDuration / segmentDuration).toInt()
+
                 for (i in 0 until numberOfSegments) {
                     val startTime = i * segmentDuration
                     val endTime = startTime + segmentDuration
@@ -54,7 +62,18 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
                         endTime.toLong()
                     )
                 }
+
+                // Check if there is any remaining time that needs to be saved
+                val remainingTime = videoDuration - (numberOfSegments * segmentDuration)
+                if (remainingTime > 0) {
+                    val startTime = numberOfSegments * segmentDuration
+                    val endTime = videoDuration
+                    val outputPath = Environment.getExternalStorageDirectory()
+                        .toString() + File.separator + "TrimCrop" + File.separator + "segment_$numberOfSegments.mp4"
+                    videoTrimmer.setTrimRange(path, outputPath, startTime.toLong(), endTime.toLong())
+                }
             }
+
         }
     }
 
