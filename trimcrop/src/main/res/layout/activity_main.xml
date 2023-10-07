@@ -3,11 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:gravity="center"
     android:orientation="vertical"
     android:padding="16dp"
-    android:background="@color/backgroundColor"
-    >
+    android:background="@color/backgroundColor">
 
     <Button
         android:id="@+id/trimmerButton"
@@ -33,6 +33,90 @@
         android:padding="5dp"
         android:textColor="@color/white"
         android:background="@drawable/edittext" />
+
+    <!--How to use section -->
+
+    <TextView
+        android:paddingVertical="15dp"
+        android:textColor="@color/textColor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="How to use:"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:paddingTop="16dp"
+        android:paddingBottom="8dp" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        app:layout_constraintWidth_percent="0.7"
+        app:layout_constraintHeight_percent="0.4"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:gravity="start"
+            app:layout_constraintWidth_percent="0.8"
+            app:layout_constraintHeight_percent="0.4"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <TextView
+                android:paddingVertical="2dp"
+                android:textColor="@color/textColor"
+                android:id="@+id/step1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1) Input a number 5-60, this will be the length of each video segment in seconds"
+                android:textSize="16sp" />
+
+            <TextView
+                android:paddingVertical="2dp"
+                android:textColor="@color/textColor"
+                android:id="@+id/step2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2) Click on the plus button to select a video."
+                android:textSize="16sp" />
+            <TextView
+                android:paddingVertical="2dp"
+                android:textColor="@color/textColor"
+                android:id="@+id/step3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="3) Once the video is selected, you will be able to preview the selected video"
+                android:textSize="16sp" />
+            <!-- ... Other TextView
+            android:paddingVertical="2dp"
+             android:textColor="@color/textColor" elements follow a similar pattern ... -->
+
+            <TextView
+                android:paddingVertical="2dp"
+                android:textColor="@color/textColor"
+                android:id="@+id/step4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="4) Click save, and the video will be saved into smaller segments (original video will not be deleted)"
+                android:textSize="16sp" />
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
 
 
 </LinearLayout>
