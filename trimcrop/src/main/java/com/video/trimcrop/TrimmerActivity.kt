@@ -1,9 +1,11 @@
 package com.video.trimcrop
 
 import android.media.MediaMetadataRetriever
+import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
+import android.util.Log
 import android.widget.Toast
 import com.video.editor.interfaces.OnVideoListener
 import kotlinx.android.synthetic.main.activity_trimmer.back
@@ -61,6 +63,14 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
                     videoTrimmer.setTrimRange(path, outputPath, startTime.toLong(),
                         endTime.toLong()
                     )
+                    // Notify the MediaStore about the new file
+                    MediaScannerConnection.scanFile(
+                        this,
+                        arrayOf(outputPath),
+                        null
+                    ) { _, uri ->
+                        Log.d("MediaScannerConnection", "Scanned $outputPath: -> uri=$uri")
+                    }
                 }
 
                 // Check if there is any remaining time that needs to be saved
@@ -71,6 +81,15 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
                     val outputPath = Environment.getExternalStorageDirectory()
                         .toString() + File.separator + "TrimCrop" + File.separator + "segment_$numberOfSegments.mp4"
                     videoTrimmer.setTrimRange(path, outputPath, startTime.toLong(), endTime.toLong())
+
+                    // Notify the MediaStore about the new file
+                    MediaScannerConnection.scanFile(
+                        this,
+                        arrayOf(outputPath),
+                        null
+                    ) { _, uri ->
+                        Log.d("MediaScannerConnection", "Scanned $outputPath: -> uri=$uri")
+                    }
                 }
             }
 
