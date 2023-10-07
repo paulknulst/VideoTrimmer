@@ -63,7 +63,7 @@ class VideoPreviewView @JvmOverloads constructor(
                         MediaMetadataRetriever.OPTION_CLOSEST_SYNC
                     )
                     val frameWidth =
-                        ((initialBitmap.width.toFloat() / initialBitmap.height.toFloat()) * frameHeight.toFloat()).toInt()
+                        ((initialBitmap!!.width.toFloat() / initialBitmap.height.toFloat()) * frameHeight.toFloat()).toInt()
                     var numThumbs = ceil((viewWidth.toFloat() / frameWidth)).toInt()
                     if (numThumbs < threshold) {
                         numThumbs = threshold
@@ -71,23 +71,25 @@ class VideoPreviewView @JvmOverloads constructor(
                     val cropWidth = viewWidth / threshold
                     val interval = videoLengthInMs / numThumbs
                     for (i in 0 until numThumbs) {
-                        var bitmap = mediaMetadataRetriever.getFrameAtTime(
+                        val bitmap = mediaMetadataRetriever.getFrameAtTime(
                             i * interval,
                             MediaMetadataRetriever.OPTION_CLOSEST_SYNC
                         )
                         bitmap?.let {
+                            var newBitmap: Bitmap
                             try {
-                                bitmap = Bitmap.createScaledBitmap(
-                                    bitmap,
+                                newBitmap = Bitmap.createScaledBitmap(
+                                    it,  // Use 'it' instead of 'bitmap'
                                     frameWidth,
                                     frameHeight,
                                     false
                                 )
-                                bitmap = Bitmap.createBitmap(bitmap, 0, 0, cropWidth, bitmap.height)
+                                newBitmap = Bitmap.createBitmap(newBitmap, 0, 0, cropWidth, newBitmap.height)
                             } catch (e: Exception) {
                                 Log.e(TAG, "error while create bitmap: $e")
+                                return@let  // Skip to next iteration if an error occurs
                             }
-                            thumbnails.put(i.toLong(), bitmap)
+                            thumbnails.put(i.toLong(), newBitmap)
                         }
                     }
                     mediaMetadataRetriever.release()
