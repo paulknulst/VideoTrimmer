@@ -18,7 +18,9 @@
             android:layout_width="@dimen/_40sdp"
             android:layout_height="@dimen/_40sdp"
             android:layout_alignParentStart="true"
-            android:foregroundGravity="center">
+            android:foregroundGravity="center"
+            android:clickable="true"
+            android:focusable="true">  <!-- Add this line -->
 
             <ImageView
                 android:layout_width="@dimen/_20sdp"
@@ -37,7 +39,9 @@
             android:text="SAVE"
             android:textAllCaps="true"
             android:textColor="@color/buttonColor"
-            android:textSize="@dimen/_13sdp" />
+            android:textSize="@dimen/_13sdp"
+            android:clickable="true"
+            android:focusable="true" />  <!-- Add this line -->
 
     </RelativeLayout>
 

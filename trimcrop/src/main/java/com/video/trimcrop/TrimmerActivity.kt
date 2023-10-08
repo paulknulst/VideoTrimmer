@@ -25,7 +25,7 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityTrimmerBinding.inflate(layoutInflater)
-        setContentView(R.layout.activity_trimmer)
+        setContentView(binding.root)  // This is correct
 
         val videoUriString = intent.getStringExtra(MainActivity.EXTRA_VIDEO_URI)
         val videoUri = Uri.parse(videoUriString)
@@ -70,10 +70,12 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
                 )
 
             binding.back.setOnClickListener {
+                println("Back button pressed")
                 binding.videoTrimmer.cancel()
             }
 
             binding.save.setOnClickListener {
+                println("TrimmerActivity onSave Called")
                 if (::rewardedInterstitialAd.isInitialized) {
                     rewardedInterstitialAd.fullScreenContentCallback =
                         object : FullScreenContentCallback() {
@@ -163,6 +165,7 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
 
     override fun cancelAction() {
         RunOnUiThread(this).safely {
+            binding = ActivityTrimmerBinding.inflate(layoutInflater)
             binding.videoTrimmer.destroy()
             finish()
         }

@@ -24,10 +24,14 @@ import com.video.editor.interfaces.OnCommandVideoListener
 import com.video.editor.interfaces.OnProgressVideoListener
 import com.video.editor.interfaces.OnRangeSeekBarListener
 import com.video.editor.interfaces.OnVideoListener
-import com.video.editor.utils.*
+import com.video.editor.utils.BackgroundExecutor
+import com.video.editor.utils.RealPathUtil
+import com.video.editor.utils.UiThreadExecutor
+import com.video.editor.utils.Utility
+import com.video.editor.utils.VideoCommands
 import java.io.File
 import java.lang.ref.WeakReference
-import java.util.*
+import java.util.Calendar
 
 
 class VideoTrimmer @JvmOverloads constructor(
@@ -195,13 +199,16 @@ class VideoTrimmer @JvmOverloads constructor(
         val mediaMetadataRetriever = MediaMetadataRetriever()
         mediaMetadataRetriever.setDataSource(context, fileUri)
         val metaDataKeyDuration =
-            java.lang.Long.parseLong(mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION))
+            mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+                ?.let { java.lang.Long.parseLong(it) }
 
         val file = File(fileUri.path ?: "")
 
         if (mTimeVideo < MIN_TIME_FRAME) {
-            if (metaDataKeyDuration - endPos > MIN_TIME_FRAME - mTimeVideo) endPos += MIN_TIME_FRAME - mTimeVideo
-            else if (startPos > MIN_TIME_FRAME - mTimeVideo) startPos -= MIN_TIME_FRAME - mTimeVideo
+            if (metaDataKeyDuration != null) {
+                if (metaDataKeyDuration - endPos > MIN_TIME_FRAME - mTimeVideo) endPos += MIN_TIME_FRAME - mTimeVideo
+                else if (startPos > MIN_TIME_FRAME - mTimeVideo) startPos -= MIN_TIME_FRAME - mTimeVideo
+            }
         }
 
         val root = File(destinationPath)
