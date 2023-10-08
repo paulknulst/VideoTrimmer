@@ -3,11 +3,11 @@ package com.video.trimcrop
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
-import kotlinx.android.synthetic.main.activity_cropper.*
+import com.video.trimcrop.databinding.ActivityCropperBinding
 import java.io.File
 
 class CropperActivity : BaseCommandActivity() {
-
+    private lateinit var binding: ActivityCropperBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_cropper)
@@ -16,9 +16,9 @@ class CropperActivity : BaseCommandActivity() {
             val extraIntent = intent
             var path = ""
             if (extraIntent != null) {
-                path = extraIntent.getStringExtra(MainActivity.EXTRA_VIDEO_PATH)!!
+                path = extraIntent.getStringExtra(MainActivity.EXTRA_VIDEO_URI)!!
             }
-            videoCropper.setVideoURI(Uri.parse(path))
+            binding.videoCropper.setVideoURI(Uri.parse(path))
                 .setOnCommandVideoListener(this)
                 .setMinMaxRatios(0.3f, 3f)
                 .setDestinationPath(
@@ -27,12 +27,12 @@ class CropperActivity : BaseCommandActivity() {
                 )
         }
 
-        back.setOnClickListener {
-            videoCropper.cancel()
+        binding.back.setOnClickListener {
+            binding.videoCropper.cancel()
         }
 
-        save.setOnClickListener {
-            videoCropper.save()
+        binding.save.setOnClickListener {
+            binding.videoCropper.save()
         }
     }
 

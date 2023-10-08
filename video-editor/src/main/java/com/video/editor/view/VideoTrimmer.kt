@@ -19,12 +19,12 @@ import android.widget.FrameLayout
 import android.widget.SeekBar
 import com.arthenica.mobileffmpeg.FFmpeg
 import com.video.editor.R
+import com.video.editor.databinding.ViewTrimmerBinding
 import com.video.editor.interfaces.OnCommandVideoListener
 import com.video.editor.interfaces.OnProgressVideoListener
 import com.video.editor.interfaces.OnRangeSeekBarListener
 import com.video.editor.interfaces.OnVideoListener
 import com.video.editor.utils.*
-import kotlinx.android.synthetic.main.view_trimmer.view.*
 import java.io.File
 import java.lang.ref.WeakReference
 import java.util.*
@@ -35,6 +35,8 @@ class VideoTrimmer @JvmOverloads constructor(
     attrs: AttributeSet,
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
+
+    private val binding = ViewTrimmerBinding.inflate(LayoutInflater.from(context), this, true)
 
     companion object {
         private const val MIN_TIME_FRAME = 1000
@@ -89,17 +91,17 @@ class VideoTrimmer @JvmOverloads constructor(
                 }
             })
 
-        video_loader.setOnErrorListener { _, what, _ ->
+        binding.videoLoader.setOnErrorListener { _, what, _ ->
             commandVideoListener?.onError("There was an error: $what")
             false
         }
 
-        video_loader.setOnTouchListener { _, event ->
+        binding.videoLoader.setOnTouchListener { _, event ->
             gestureDetector.onTouchEvent(event)
             true
         }
 
-        handlerTop.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        binding.handlerTop.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                 onPlayerIndicatorSeekChanged(progress, fromUser)
             }
@@ -113,12 +115,12 @@ class VideoTrimmer @JvmOverloads constructor(
             }
         })
 
-        timeLineBar.addOnRangeSeekBarListener(object : OnRangeSeekBarListener {
+        binding.timeLineBar.addOnRangeSeekBarListener(object : OnRangeSeekBarListener {
             override fun onCreate(rangeSeekBarView: RangeSeekBarView, index: Int, value: Float) {
             }
 
             override fun onSeek(rangeSeekBarView: RangeSeekBarView, index: Int, value: Float) {
-                handlerTop.visibility = View.GONE
+                binding.handlerTop.visibility = View.GONE
                 onSeekThumbs(index, value)
             }
 
@@ -130,8 +132,8 @@ class VideoTrimmer @JvmOverloads constructor(
             }
         })
 
-        video_loader.setOnPreparedListener { mp -> onVideoPrepared(mp) }
-        video_loader.setOnCompletionListener { onVideoCompleted() }
+        binding.videoLoader.setOnPreparedListener { mp -> onVideoPrepared(mp) }
+        binding.videoLoader.setOnCompletionListener { onVideoCompleted() }
     }
 
     private fun onPlayerIndicatorSeekChanged(progress: Int, fromUser: Boolean) {
@@ -144,8 +146,8 @@ class VideoTrimmer @JvmOverloads constructor(
 
     private fun onPlayerIndicatorSeekStart() {
         messageHandler.removeMessages(SHOW_PROGRESS)
-        video_loader.pause()
-        icon_video_play.visibility = View.VISIBLE
+        binding.videoLoader.pause()
+        binding.iconVideoPlay.visibility = View.VISIBLE
         notifyProgressUpdate(false)
     }
 
@@ -166,29 +168,29 @@ class VideoTrimmer @JvmOverloads constructor(
 
     private fun onPlayerIndicatorSeekStop(seekBar: SeekBar) {
         messageHandler.removeMessages(SHOW_PROGRESS)
-        video_loader.pause()
-        icon_video_play.visibility = View.VISIBLE
+        binding.videoLoader.pause()
+        binding.iconVideoPlay.visibility = View.VISIBLE
 
         val duration = (duration * seekBar.progress / 1000L).toInt()
-        video_loader.seekTo(duration)
+        binding.videoLoader.seekTo(duration)
         notifyProgressUpdate(false)
     }
 
     private fun setProgressBarPosition(position: Float) {
-        if (duration > 0) handlerTop.progress = (1000L * position / duration).toInt()
+        if (duration > 0) binding.handlerTop.progress = (1000L * position / duration).toInt()
     }
 
     private fun setUpMargins() {
-        val marge = timeLineBar.thumbs[0].widthBitmap
-        val lp = timeLineView.layoutParams as LayoutParams
+        val marge = binding.timeLineBar.thumbs[0].widthBitmap
+        val lp = binding.timeLineView.layoutParams as LayoutParams
         lp.setMargins(marge, 0, marge, 0)
-        timeLineView.layoutParams = lp
+        binding.timeLineView.layoutParams = lp
     }
 
     fun save() {
         commandVideoListener?.onStarted()
-        icon_video_play.visibility = View.VISIBLE
-        video_loader.pause()
+        binding.iconVideoPlay.visibility = View.VISIBLE
+        binding.videoLoader.pause()
 
         val mediaMetadataRetriever = MediaMetadataRetriever()
         mediaMetadataRetriever.setDataSource(context, fileUri)
@@ -252,23 +254,23 @@ class VideoTrimmer @JvmOverloads constructor(
     }
 
     private fun togglePause() {
-        if (video_loader.isPlaying) {
-            icon_video_play.visibility = View.VISIBLE
+        if (binding.videoLoader.isPlaying) {
+            binding.iconVideoPlay.visibility = View.VISIBLE
             messageHandler.removeMessages(SHOW_PROGRESS)
-            video_loader.pause()
+            binding.videoLoader.pause()
         } else {
-            icon_video_play.visibility = View.GONE
+            binding.iconVideoPlay.visibility = View.GONE
             if (resetBar) {
                 resetBar = false
-                video_loader.seekTo(startPos.toInt())
+                binding.videoLoader.seekTo(startPos.toInt())
             }
             messageHandler.sendEmptyMessage(SHOW_PROGRESS)
-            video_loader.start()
+            binding.videoLoader.start()
         }
     }
 
     fun cancel() {
-        video_loader.stopPlayback()
+        binding.videoLoader.stopPlayback()
         commandVideoListener?.cancelAction()
     }
 
@@ -276,10 +278,10 @@ class VideoTrimmer @JvmOverloads constructor(
         val videoWidth = mp.videoWidth
         val videoHeight = mp.videoHeight
         val videoProportion = videoWidth.toFloat() / videoHeight.toFloat()
-        val screenWidth = layout_surface_view.width
-        val screenHeight = layout_surface_view.height
+        val screenWidth = binding.layoutSurfaceView.width
+        val screenHeight = binding.layoutSurfaceView.height
         val screenProportion = screenWidth.toFloat() / screenHeight.toFloat()
-        val lp = video_loader.layoutParams
+        val lp = binding.videoLoader.layoutParams
 
         if (videoProportion > screenProportion) {
             lp.width = screenWidth
@@ -288,11 +290,11 @@ class VideoTrimmer @JvmOverloads constructor(
             lp.width = (videoProportion * screenHeight.toFloat()).toInt()
             lp.height = screenHeight
         }
-        video_loader.layoutParams = lp
+        binding.videoLoader.layoutParams = lp
 
-        icon_video_play.visibility = View.VISIBLE
+        binding.iconVideoPlay.visibility = View.VISIBLE
 
-        duration = video_loader.duration.toFloat()
+        duration = binding.videoLoader.duration.toFloat()
         setSeekBarPosition()
 
         setTimeFrames()
@@ -305,28 +307,28 @@ class VideoTrimmer @JvmOverloads constructor(
             duration >= maxDuration && maxDuration != -1 -> {
                 startPos = duration / 2 - maxDuration / 2
                 endPos = duration / 2 + maxDuration / 2
-                timeLineBar.setThumbValue(0, (startPos * 100 / duration))
-                timeLineBar.setThumbValue(1, (endPos * 100 / duration))
+                binding.timeLineBar.setThumbValue(0, (startPos * 100 / duration))
+                binding.timeLineBar.setThumbValue(1, (endPos * 100 / duration))
             }
             duration <= minDuration && minDuration != -1 -> {
                 startPos = duration / 2 - minDuration / 2
                 endPos = duration / 2 + minDuration / 2
-                timeLineBar.setThumbValue(0, (startPos * 100 / duration))
-                timeLineBar.setThumbValue(1, (endPos * 100 / duration))
+                binding.timeLineBar.setThumbValue(0, (startPos * 100 / duration))
+                binding.timeLineBar.setThumbValue(1, (endPos * 100 / duration))
             }
             else -> {
                 startPos = 0f
                 endPos = duration
             }
         }
-        video_loader.seekTo(startPos.toInt())
+        binding.videoLoader.seekTo(startPos.toInt())
         mTimeVideo = duration
-        timeLineBar.initMaxWidth()
+        binding.timeLineBar.initMaxWidth()
     }
 
     private fun setTimeFrames() {
         val seconds = context.getString(R.string.short_seconds)
-        textTimeSelection.text = String.format(
+        binding.textTimeSelection.text = String.format(
             "%s %s - %s %s",
             Utility.convertTimestampToString(startPos),
             seconds,
@@ -339,7 +341,7 @@ class VideoTrimmer @JvmOverloads constructor(
         when (index) {
             Thumb.LEFT -> {
                 startPos = (duration * value / 100L)
-                video_loader.seekTo(startPos.toInt())
+                binding.videoLoader.seekTo(startPos.toInt())
             }
             Thumb.RIGHT -> {
                 endPos = (duration * value / 100L)
@@ -351,17 +353,17 @@ class VideoTrimmer @JvmOverloads constructor(
 
     private fun onStopSeekThumbs() {
         messageHandler.removeMessages(SHOW_PROGRESS)
-        video_loader.pause()
-        icon_video_play.visibility = View.VISIBLE
+        binding.videoLoader.pause()
+        binding.iconVideoPlay.visibility = View.VISIBLE
     }
 
     private fun onVideoCompleted() {
-        video_loader.seekTo(startPos.toInt())
+        binding.videoLoader.seekTo(startPos.toInt())
     }
 
     private fun notifyProgressUpdate(all: Boolean) {
         if (duration == 0f) return
-        val position = video_loader.currentPosition
+        val position = binding.videoLoader.currentPosition
         if (all) {
             for (item in progressListener) {
                 item.updateProgress(position.toFloat(), duration, (position * 100 / duration))
@@ -376,13 +378,13 @@ class VideoTrimmer @JvmOverloads constructor(
     }
 
     private fun updateVideoProgress(time: Float) {
-        if (video_loader == null) return
-        if (time <= startPos && time <= endPos) handlerTop.visibility = View.GONE
-        else handlerTop.visibility = View.VISIBLE
+        if (binding.videoLoader == null) return
+        if (time <= startPos && time <= endPos) binding.handlerTop.visibility = View.GONE
+        else binding.handlerTop.visibility = View.VISIBLE
         if (time >= endPos) {
             messageHandler.removeMessages(SHOW_PROGRESS)
-            video_loader.pause()
-            icon_video_play.visibility = View.VISIBLE
+            binding.videoLoader.pause()
+            binding.iconVideoPlay.visibility = View.VISIBLE
             resetBar = true
             return
         }
@@ -390,7 +392,7 @@ class VideoTrimmer @JvmOverloads constructor(
     }
 
     fun setVideoInformationVisibility(visible: Boolean): VideoTrimmer {
-        timeFrame.visibility = if (visible) View.VISIBLE else View.GONE
+        binding.timeFrame.visibility = if (visible) View.VISIBLE else View.GONE
         return this
     }
 
@@ -426,9 +428,9 @@ class VideoTrimmer @JvmOverloads constructor(
 
     fun setVideoURI(videoURI: Uri): VideoTrimmer {
         fileUri = videoURI
-        video_loader.setVideoURI(fileUri)
-        video_loader.requestFocus()
-        timeLineView.setVideo(fileUri)
+        binding.videoLoader.setVideoURI(fileUri)
+        binding.videoLoader.requestFocus()
+        binding.timeLineView.setVideo(fileUri)
         return this
     }
 
@@ -436,11 +438,11 @@ class VideoTrimmer @JvmOverloads constructor(
         private val viewReference: WeakReference<VideoTrimmer> = WeakReference(view)
         override fun handleMessage(msg: Message) {
             val view = viewReference.get()
-            if (view == null || view.video_loader == null) {
+            if (view == null || view.binding.videoLoader == null) {
                 return
             }
             view.notifyProgressUpdate(true)
-            if (view.video_loader.isPlaying) {
+            if (view.binding.videoLoader.isPlaying) {
                 sendEmptyMessageDelayed(0, 10)
             }
         }

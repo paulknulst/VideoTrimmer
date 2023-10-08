@@ -1,14 +1,28 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-parcelize'
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 31
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 29
+        targetSdkVersion 31
     }
+
+    buildFeatures {
+        viewBinding true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -22,7 +36,7 @@ dependencies {
     implementation 'com.arthenica:mobile-ffmpeg-full:4.4.LTS'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'org.jetbrains.anko:anko-sqlite:0.10.2'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.1.1'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'com.writingminds:FFmpegAndroid:0.3.2'
     implementation 'com.theartofdev.edmodo:android-image-cropper:2.8.0'

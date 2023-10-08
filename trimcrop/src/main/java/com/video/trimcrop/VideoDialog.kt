@@ -5,13 +5,14 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import kotlinx.android.synthetic.main.progress_loading.*
+import com.video.trimcrop.databinding.ProgressLoadingBinding
 
 
 class VideoDialog(
     ctx: Context,
     private var message: String
 ) : Dialog(ctx) {
+    private lateinit var binding: ProgressLoadingBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,6 +21,6 @@ class VideoDialog(
         setCancelable(false)
         setCanceledOnTouchOutside(false)
 
-        messageLabel.text = message
+        binding.messageLabel.text = message
     }
 }

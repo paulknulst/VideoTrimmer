@@ -10,11 +10,11 @@ import android.view.LayoutInflater
 import android.widget.FrameLayout
 import android.widget.SeekBar
 import com.video.editor.R
+import com.video.editor.databinding.ViewCropperBinding
 import com.video.editor.interfaces.OnCommandVideoListener
 import com.video.editor.utils.BackgroundExecutor
 import com.video.editor.utils.RealPathUtil
 import com.video.editor.utils.VideoCommands
-import kotlinx.android.synthetic.main.view_cropper.view.*
 import org.jetbrains.anko.runOnUiThread
 import java.io.File
 import java.util.*
@@ -25,6 +25,8 @@ class VideoCropper @JvmOverloads constructor(
     attrs: AttributeSet,
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
+
+    private val binding = ViewCropperBinding.inflate(LayoutInflater.from(context), this, true)
 
     private lateinit var fileUri: Uri
     private var commandVideoListener: OnCommandVideoListener? = null
@@ -55,7 +57,7 @@ class VideoCropper @JvmOverloads constructor(
     }
 
     private fun setUpListeners() {
-        cropSeekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        binding.cropSeekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 onCropProgressChanged(progress)
             }
@@ -67,7 +69,7 @@ class VideoCropper @JvmOverloads constructor(
             }
         })
 
-        handlerTop.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        binding.handlerTop.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
             }
 
@@ -83,7 +85,7 @@ class VideoCropper @JvmOverloads constructor(
     fun onCropProgressChanged(progress: Int) {
         val width: Int
         val height: Int
-        val progressRatio = minRatio + ((abs(minRatio - maxRatio) / cropSeekbar.max) * progress)
+        val progressRatio = minRatio + ((abs(minRatio - maxRatio) / binding.cropSeekbar.max) * progress)
         if (videoWidth > videoHeight) {
             height = (videoWidth / progressRatio).toInt()
             width = videoWidth
@@ -91,12 +93,12 @@ class VideoCropper @JvmOverloads constructor(
             width = (progressRatio * videoHeight).toInt()
             height = videoHeight
         }
-        cropFrame.setAspectRatio(width, height)
+        binding.cropFrame.setAspectRatio(width, height)
     }
 
     fun setVideoURI(videoURI: Uri): VideoCropper {
         fileUri = videoURI
-        timeLineView.setVideo(fileUri)
+        binding.timeLineView.setVideo(fileUri)
         loadFrame(0)
         val mediaMetadataRetriever = MediaMetadataRetriever()
         mediaMetadataRetriever.setDataSource(context, fileUri)
@@ -110,7 +112,7 @@ class VideoCropper @JvmOverloads constructor(
     }
 
     fun save() {
-        val rect = cropFrame.cropRect
+        val rect = binding.cropFrame.cropRect
         val width = abs(rect.left - rect.right)
         val height = abs(rect.top - rect.bottom)
         val x = rect.left
@@ -170,9 +172,9 @@ class VideoCropper @JvmOverloads constructor(
     fun setMinMaxRatios(minRatio: Float, maxRatio: Float): VideoCropper {
         this.minRatio = minRatio
         this.maxRatio = maxRatio
-        cropFrame.setFixedAspectRatio(true)
+        binding.cropFrame.setFixedAspectRatio(true)
         onCropProgressChanged(50)
-        cropSeekbar.progress = 50
+        binding.cropSeekbar.progress = 50
         return this
     }
 
@@ -193,7 +195,7 @@ class VideoCropper @JvmOverloads constructor(
                     if (bitmap != null) {
                         try {
                             context.runOnUiThread {
-                                cropFrame.setImageBitmap(bitmap)
+                                binding.cropFrame.setImageBitmap(bitmap)
                             }
                         } catch (e: Exception) {
                             e.printStackTrace()

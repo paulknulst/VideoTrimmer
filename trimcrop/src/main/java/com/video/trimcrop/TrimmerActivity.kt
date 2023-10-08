@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
+import android.view.LayoutInflater
 import android.widget.Toast
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
@@ -14,18 +15,22 @@ import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd
 import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAdLoadCallback
 import com.video.editor.interfaces.OnVideoListener
-import kotlinx.android.synthetic.main.activity_trimmer.back
-import kotlinx.android.synthetic.main.activity_trimmer.save
-import kotlinx.android.synthetic.main.activity_trimmer.videoTrimmer
+import com.video.trimcrop.databinding.ActivityTrimmerBinding
 import java.io.File
 
 class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
 
     private var segmentLengthInSeconds: Int = 10
     private lateinit var rewardedInterstitialAd: RewardedInterstitialAd
+
+    private lateinit var binding: ActivityTrimmerBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        binding = ActivityTrimmerBinding.inflate(layoutInflater)
         setContentView(R.layout.activity_trimmer)
+
+        val videoUriString = intent.getStringExtra(MainActivity.EXTRA_VIDEO_URI)
+        val videoUri = Uri.parse(videoUriString)
 
         val adRequest = AdRequest.Builder().build()
         RewardedInterstitialAd.load(
@@ -49,14 +54,14 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
             val extraIntent = intent
             var path = ""
             if (extraIntent != null) {
-                path = extraIntent.getStringExtra(MainActivity.EXTRA_VIDEO_PATH)!!
+                path = extraIntent.getStringExtra(MainActivity.EXTRA_VIDEO_URI)!!
             }
 
 
-            videoTrimmer
+            binding.videoTrimmer
                 .setOnCommandListener(this)
                 .setOnVideoListener(this)
-                .setVideoURI(Uri.parse(path))
+                .setVideoURI(videoUri)  // Use Uri directly here
                 .setVideoInformationVisibility(true)
                 .setMaxDuration(60)
                 .setMinDuration(5)
@@ -65,11 +70,11 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
                         .toString() + File.separator + "TrimCrop" + File.separator
                 )
 
-            back.setOnClickListener {
-                videoTrimmer.cancel()
+            binding.back.setOnClickListener {
+                binding.videoTrimmer.cancel()
             }
 
-            save.setOnClickListener {
+            binding.save.setOnClickListener {
                 if (::rewardedInterstitialAd.isInitialized) {
                     rewardedInterstitialAd.fullScreenContentCallback = object : FullScreenContentCallback() {
                         override fun onAdDismissedFullScreenContent() {
@@ -93,7 +98,7 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
                         // proceedWithSaveOperation()
                     }
                 }
-                val videoDuration = getVideoDuration(path)
+                val videoDuration = getVideoDuration(videoUri)
                 val segmentDuration = segmentLengthInSeconds * 1000
                 val numberOfSegments = (videoDuration / segmentDuration).toInt()
 
@@ -102,7 +107,7 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
                     val endTime = startTime + segmentDuration
                     val outputPath = Environment.getExternalStorageDirectory()
                         .toString() + File.separator + "TrimCrop" + File.separator + "segment_$i.mp4"
-                    videoTrimmer.setTrimRange(path, outputPath, startTime.toLong(),
+                    binding.videoTrimmer.setTrimRange(path, outputPath, startTime.toLong(),
                         endTime.toLong()
                     )
                     // Notify the MediaStore about the new file
@@ -122,7 +127,7 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
                     //video duration is the same as endTime
                     val outputPath = Environment.getExternalStorageDirectory()
                         .toString() + File.separator + "TrimCrop" + File.separator + "segment_$numberOfSegments.mp4"
-                    videoTrimmer.setTrimRange(path, outputPath, startTime.toLong(), videoDuration)
+                    binding.videoTrimmer.setTrimRange(path, outputPath, startTime.toLong(), videoDuration)
 
                     // Notify the MediaStore about the new file
                     MediaScannerConnection.scanFile(
@@ -138,9 +143,9 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
         }
     }
 
-    private fun getVideoDuration(path: String): Long {
+    private fun getVideoDuration(uri: Uri): Long {
         val retriever = MediaMetadataRetriever()
-        retriever.setDataSource(path)
+        retriever.setDataSource(this, uri)  // Use this method to set Uri
         val duration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
         retriever.release()
         return duration?.toLong() ?: 0L
@@ -148,7 +153,7 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
 
     override fun cancelAction() {
         RunOnUiThread(this).safely {
-            videoTrimmer.destroy()
+            binding.videoTrimmer.destroy()
             finish()
         }
     }

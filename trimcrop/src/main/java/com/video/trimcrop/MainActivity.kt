@@ -8,14 +8,19 @@ import android.widget.EditText
 import android.widget.Toast
 import com.google.android.gms.ads.MobileAds
 import com.video.editor.utils.FileUtils
-import kotlinx.android.synthetic.main.activity_main.*
+import com.video.trimcrop.databinding.ActivityMainBinding
 
 class MainActivity : PermActivity() {
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        trimmerButton.setOnClickListener { pickFromGallery(REQUEST_VIDEO_TRIMMER) }
+        // Initialize the binding class
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        // Access views via the binding class
+        binding.trimmerButton.setOnClickListener { pickFromGallery(REQUEST_VIDEO_TRIMMER) }
 
         MobileAds.initialize(this) {}
     }
@@ -58,14 +63,15 @@ class MainActivity : PermActivity() {
         val segmentLength = segmentLengthInput.text.toString().toInt()
 
         val intent = Intent(this, TrimmerActivity::class.java)
-        intent.putExtra(EXTRA_VIDEO_PATH, FileUtils.getPath(this, uri))
+        intent.putExtra(EXTRA_VIDEO_URI, uri.toString())  // Send Uri as a string
         intent.putExtra("segmentLength", segmentLength)
         startActivity(intent)
     }
 
     companion object {
         private const val REQUEST_VIDEO_TRIMMER = 0x01
-        internal const val EXTRA_VIDEO_PATH = "EXTRA_VIDEO_PATH"
+        internal const val EXTRA_VIDEO_URI = "EXTRA_VIDEO_URI"  // Updated constant name for clarity
     }
+
 
 }

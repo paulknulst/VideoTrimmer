@@ -8,22 +8,24 @@ import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
-import kotlinx.android.synthetic.main.dialog_permissions.*
+import com.video.trimcrop.databinding.DialogPermissionsBinding
 
 class PermissionsDialog(var ctx: Context, var msg: String) : Dialog(ctx) {
+
+    private lateinit var binding: DialogPermissionsBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.dialog_permissions)
 
         window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
-        message.text = msg
+        binding.message.text = msg
 
-        dismiss.setOnClickListener {
+        binding.dismiss.setOnClickListener {
             dismiss()
         }
 
-        settings.setOnClickListener {
+        binding.settings.setOnClickListener {
             val i = Intent(
                 Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
                 Uri.parse("package:" + BuildConfig.APPLICATION_ID)
