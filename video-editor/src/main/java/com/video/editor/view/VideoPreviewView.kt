@@ -21,9 +21,9 @@ class VideoPreviewView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
-    private var videoUri: Uri? = null
+    @Volatile private var videoUri: Uri? = null
     private var viewHeight: Int = 0
-    private var bitmaps: LongSparseArray<Bitmap>? = null
+    @Volatile private var bitmaps: LongSparseArray<Bitmap>? = null
 
     init {
         init()
@@ -43,10 +43,16 @@ class VideoPreviewView @JvmOverloads constructor(
 
     override fun onSizeChanged(w: Int, h: Int, oldW: Int, oldH: Int) {
         super.onSizeChanged(w, h, oldW, oldH)
-        if (w != oldW) createPreview(w)
+        if (w != oldW && videoUri != null) createPreview(w)
     }
 
     private fun createPreview(viewWidth: Int) {
+        if (videoUri == null) {
+            println("videoUri is null on instance ${this.hashCode()}, createPreview aborted")
+            return
+        }else {
+            println("CreatePreview on instance ${this.hashCode()} videoUri: $videoUri")
+        }
         BackgroundExecutor.execute(object : BackgroundExecutor.Task("", 0L, "") {
             override fun execute() {
                 try {
@@ -54,9 +60,13 @@ class VideoPreviewView @JvmOverloads constructor(
                     val thumbnails = LongSparseArray<Bitmap>()
                     val mediaMetadataRetriever = MediaMetadataRetriever()
                     mediaMetadataRetriever.setDataSource(context, videoUri)
-                    val videoLengthInMs = (Integer.parseInt(
-                        mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
-                    ) * 1000).toLong()
+                    val videoLengthInMs =
+                        (mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+                            ?.let {
+                                Integer.parseInt(
+                                    it
+                                )
+                            }?.times(1000))?.toLong()
                     val frameHeight = viewHeight
                     val initialBitmap = mediaMetadataRetriever.getFrameAtTime(
                         0,
@@ -69,13 +79,16 @@ class VideoPreviewView @JvmOverloads constructor(
                         numThumbs = threshold
                     }
                     val cropWidth = viewWidth / threshold
-                    val interval = videoLengthInMs / numThumbs
+                    val interval = videoLengthInMs?.div(numThumbs)
+                    println("videoLengthInMs: $videoLengthInMs, frameWidth: $frameWidth, numThumbs: $numThumbs, interval: $interval")
                     for (i in 0 until numThumbs) {
+                        println("Entering for loop, iteration: $i")
                         val bitmap = mediaMetadataRetriever.getFrameAtTime(
-                            i * interval,
+                            i * interval!!,
                             MediaMetadataRetriever.OPTION_CLOSEST_SYNC
                         )
                         bitmap?.let {
+                            println("Bitmap is not null for iteration: $i")
                             var newBitmap: Bitmap
                             try {
                                 newBitmap = Bitmap.createScaledBitmap(
@@ -84,47 +97,62 @@ class VideoPreviewView @JvmOverloads constructor(
                                     frameHeight,
                                     false
                                 )
-                                newBitmap = Bitmap.createBitmap(newBitmap, 0, 0, cropWidth, newBitmap.height)
+                                newBitmap = Bitmap.createBitmap(
+                                    newBitmap,
+                                    0,
+                                    0,
+                                    cropWidth,
+                                    newBitmap.height
+                                )
                             } catch (e: Exception) {
                                 Log.e(TAG, "error while create bitmap: $e")
                                 return@let  // Skip to next iteration if an error occurs
                             }
                             thumbnails.put(i.toLong(), newBitmap)
-                        }
+                        } ?: println("Bitmap is null for iteration: $i")
                     }
                     mediaMetadataRetriever.release()
                     returnBitmaps(thumbnails)
                 } catch (e: Throwable) {
                     Thread.getDefaultUncaughtExceptionHandler()
-                        .uncaughtException(Thread.currentThread(), e)
+                        ?.uncaughtException(Thread.currentThread(), e)
                 }
             }
         })
     }
 
     private fun returnBitmaps(thumbnailList: LongSparseArray<Bitmap>) {
-        UiThreadExecutor.runTask("", Runnable {
+        println("returnBitmaps called, thumbnailList size: ${thumbnailList.size()}")
+        UiThreadExecutor.runTask("", {
             bitmaps = thumbnailList
+            println("bitmaps updated, bitmaps size: ${bitmaps?.size() ?: 0}")
             invalidate()
         }, 0L)
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+        println("onDraw called, bitmaps size: ${bitmaps?.size() ?: 0}")
         if (bitmaps != null) {
             canvas.save()
             var x = 0
             for (i in 0 until (bitmaps?.size() ?: 0)) {
                 val bitmap = bitmaps?.get(i.toLong())
                 if (bitmap != null) {
+                    println("Drawing bitmap at index: $i")
                     canvas.drawBitmap(bitmap, x.toFloat(), 0f, null)
                     x += bitmap.width
                 }
             }
+            canvas.restore()
         }
     }
 
     fun setVideo(data: Uri) {
+        println("setVideo was called on instance ${this.hashCode()} with this uri: $data and here is ${data.path}")
         videoUri = data
+        createPreview(width)
+        postInvalidate()  // Request a redraw
     }
+
 }

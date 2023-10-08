@@ -6,9 +6,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
-import android.view.LayoutInflater
 import android.widget.Toast
-import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
@@ -31,6 +29,7 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
 
         val videoUriString = intent.getStringExtra(MainActivity.EXTRA_VIDEO_URI)
         val videoUri = Uri.parse(videoUriString)
+        println("TrimmerActivity onCreate videoUri: $videoUri")
 
         val adRequest = AdRequest.Builder().build()
         RewardedInterstitialAd.load(
@@ -61,7 +60,7 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
             binding.videoTrimmer
                 .setOnCommandListener(this)
                 .setOnVideoListener(this)
-                .setVideoURI(videoUri)  // Use Uri directly here
+                .setVideoURI(Uri.parse(path))  // Use Uri directly here
                 .setVideoInformationVisibility(true)
                 .setMaxDuration(60)
                 .setMinDuration(5)
@@ -76,24 +75,29 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
 
             binding.save.setOnClickListener {
                 if (::rewardedInterstitialAd.isInitialized) {
-                    rewardedInterstitialAd.fullScreenContentCallback = object : FullScreenContentCallback() {
-                        override fun onAdDismissedFullScreenContent() {
-                            // Continue with the save operation after the ad is dismissed
-                            //proceedWithSaveOperation()
-                        }
+                    rewardedInterstitialAd.fullScreenContentCallback =
+                        object : FullScreenContentCallback() {
+                            override fun onAdDismissedFullScreenContent() {
+                                // Continue with the save operation after the ad is dismissed
+                                //proceedWithSaveOperation()
+                            }
 
 //                        override fun onAdFailedToShowFullScreenContent(adError: AdError?) {
 //                            // Handle the error and continue with the save operation
 //                            //proceedWithSaveOperation()
 //                        }
 
-                        override fun onAdShowedFullScreenContent() {
-                            // Ad is being shown
+                            override fun onAdShowedFullScreenContent() {
+                                // Ad is being shown
+                            }
                         }
-                    }
                     rewardedInterstitialAd.show(this) { rewardItem ->
                         // Handle the reward
-                        Toast.makeText(this, "Reward: ${rewardItem.amount} ${rewardItem.type}", Toast.LENGTH_LONG).show()
+                        Toast.makeText(
+                            this,
+                            "Reward: ${rewardItem.amount} ${rewardItem.type}",
+                            Toast.LENGTH_LONG
+                        ).show()
                         // Now you could proceed with the save operation
                         // proceedWithSaveOperation()
                     }
@@ -107,7 +111,8 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
                     val endTime = startTime + segmentDuration
                     val outputPath = Environment.getExternalStorageDirectory()
                         .toString() + File.separator + "TrimCrop" + File.separator + "segment_$i.mp4"
-                    binding.videoTrimmer.setTrimRange(path, outputPath, startTime.toLong(),
+                    binding.videoTrimmer.setTrimRange(
+                        path, outputPath, startTime.toLong(),
                         endTime.toLong()
                     )
                     // Notify the MediaStore about the new file
@@ -127,7 +132,12 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
                     //video duration is the same as endTime
                     val outputPath = Environment.getExternalStorageDirectory()
                         .toString() + File.separator + "TrimCrop" + File.separator + "segment_$numberOfSegments.mp4"
-                    binding.videoTrimmer.setTrimRange(path, outputPath, startTime.toLong(), videoDuration)
+                    binding.videoTrimmer.setTrimRange(
+                        path,
+                        outputPath,
+                        startTime.toLong(),
+                        videoDuration
+                    )
 
                     // Notify the MediaStore about the new file
                     MediaScannerConnection.scanFile(

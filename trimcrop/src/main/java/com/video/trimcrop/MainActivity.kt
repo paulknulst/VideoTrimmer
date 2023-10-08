@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.widget.EditText
 import android.widget.Toast
 import com.google.android.gms.ads.MobileAds
-import com.video.editor.utils.FileUtils
 import com.video.trimcrop.databinding.ActivityMainBinding
 
 class MainActivity : PermActivity() {
@@ -61,6 +60,7 @@ class MainActivity : PermActivity() {
     private fun startTrimActivity(uri: Uri) {
         val segmentLengthInput = findViewById<EditText>(R.id.segmentLengthInput)
         val segmentLength = segmentLengthInput.text.toString().toInt()
+        println("MainActivity startTrimActivity uri: $uri")
 
         val intent = Intent(this, TrimmerActivity::class.java)
         intent.putExtra(EXTRA_VIDEO_URI, uri.toString())  // Send Uri as a string
