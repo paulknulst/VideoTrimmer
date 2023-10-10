@@ -1,12 +1,15 @@
 package com.video.trimcrop
 
+import android.content.ContentValues
+import android.content.Context
 import android.media.MediaMetadataRetriever
-import android.media.MediaScannerConnection
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.util.Log
+import android.provider.MediaStore
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
@@ -15,16 +18,46 @@ import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAdLoa
 import com.video.editor.interfaces.OnVideoListener
 import com.video.trimcrop.databinding.ActivityTrimmerBinding
 import java.io.File
+import java.io.FileOutputStream
 
 class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
 
     private var segmentLengthInSeconds: Int = 10
     private lateinit var rewardedInterstitialAd: RewardedInterstitialAd
 
-    private lateinit var binding: ActivityTrimmerBinding
+    private val binding: ActivityTrimmerBinding by lazy {
+        ActivityTrimmerBinding.inflate(layoutInflater)
+    }
+
+    private val resolver by lazy { contentResolver }
+
+    fun copyUriToFile(context: Context, uri: Uri, file: File): File {
+        context.contentResolver.openInputStream(uri)?.use { input ->
+            FileOutputStream(file).use { output ->
+                val buffer = ByteArray(4 * 1024) // buffer size
+                var read: Int
+                while (input.read(buffer).also { read = it } != -1) {
+                    output.write(buffer, 0, read)
+                }
+                output.flush()
+            }
+        }
+        return file
+    }
+
+
+    fun getExternalOutputFilePath(fileName: String): String {
+        val moviesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)
+        val appDir = File(moviesDir, "MyApp") // replace "MyApp" with your app's name
+        appDir.mkdirs()
+        val outputFile = File(appDir, fileName)
+        return outputFile.absolutePath
+    }
+
+
+    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityTrimmerBinding.inflate(layoutInflater)
         setContentView(binding.root)  // This is correct
 
         val videoUriString = intent.getStringExtra(MainActivity.EXTRA_VIDEO_URI)
@@ -111,43 +144,61 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
                 for (i in 0 until numberOfSegments) {
                     val startTime = i * segmentDuration
                     val endTime = startTime + segmentDuration
-                    val outputPath = Environment.getExternalStorageDirectory()
-                        .toString() + File.separator + "TrimCrop" + File.separator + "segment_$i.mp4"
-                    binding.videoTrimmer.setTrimRange(
-                        path, outputPath, startTime.toLong(),
-                        endTime.toLong()
+                    val outputStream = FileOutputStream(
+                        File(
+                            Environment.getExternalStorageDirectory(),
+                            "TrimCrop${File.separator}segment_$i.mp4"
+                        )
                     )
-                    // Notify the MediaStore about the new file
-                    MediaScannerConnection.scanFile(
-                        this,
-                        arrayOf(outputPath),
-                        null
-                    ) { _, uri ->
-                        Log.d("MediaScannerConnection", "Scanned $outputPath: -> uri=$uri")
+
+                    val itemUri = Uri.parse(path)
+                    val newFile = copyUriToFile(this, videoUri, File(filesDir, "temp_video.mp4"))
+                    val outputPath = File(filesDir, "output_video.mp4").absolutePath
+                    val contentValues = ContentValues().apply {
+                        put(MediaStore.MediaColumns.DISPLAY_NAME, "trimmed_video.mp4")
+                        put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4")
+                        put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_MOVIES)
                     }
+
+                    val uri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues)
+
+                    uri?.let {
+                        val outputFilePath = getExternalOutputFilePath("output_video_0.mp4")
+                        binding.videoTrimmer.setTrimRange(
+                            videoUri,
+                            outputFilePath,
+                            startTime.toLong(),
+                            endTime.toLong()
+                        )
+                    }
+
+                    outputStream.close()
                 }
 
-                // Check if there is any remaining time that needs to be saved
+                    // Check if there is any remaining time that needs to be saved
                 val remainingTime = videoDuration - (numberOfSegments * segmentDuration)
                 if (remainingTime > 0) {
                     val startTime = numberOfSegments * segmentDuration
                     //video duration is the same as endTime
-                    val outputPath = Environment.getExternalStorageDirectory()
-                        .toString() + File.separator + "TrimCrop" + File.separator + "segment_$numberOfSegments.mp4"
-                    binding.videoTrimmer.setTrimRange(
-                        path,
-                        outputPath,
-                        startTime.toLong(),
-                        videoDuration
-                    )
 
-                    // Notify the MediaStore about the new file
-                    MediaScannerConnection.scanFile(
-                        this,
-                        arrayOf(outputPath),
-                        null
-                    ) { _, uri ->
-                        Log.d("MediaScannerConnection", "Scanned $outputPath: -> uri=$uri")
+                    val newFile = copyUriToFile(this, videoUri, File(filesDir, "temp_video.mp4"))
+                    val outputPath = File(filesDir, "output_video.mp4").absolutePath
+                    val contentValues = ContentValues().apply {
+                        put(MediaStore.MediaColumns.DISPLAY_NAME, "trimmed_video.mp4")
+                        put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4")
+                        put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_MOVIES)
+                    }
+
+                    val uri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues)
+
+                    uri?.let {
+                        val outputFilePath = getExternalOutputFilePath("output_video_0.mp4")
+                        binding.videoTrimmer.setTrimRange(
+                            videoUri,
+                            outputFilePath,
+                            startTime.toLong(),
+                            videoDuration.toLong()
+                        )
                     }
                 }
             }
@@ -165,7 +216,6 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
 
     override fun cancelAction() {
         RunOnUiThread(this).safely {
-            binding = ActivityTrimmerBinding.inflate(layoutInflater)
             binding.videoTrimmer.destroy()
             finish()
         }

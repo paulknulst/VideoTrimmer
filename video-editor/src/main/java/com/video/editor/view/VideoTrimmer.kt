@@ -17,6 +17,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.SeekBar
+import com.arthenica.mobileffmpeg.Config
 import com.arthenica.mobileffmpeg.FFmpeg
 import com.video.editor.R
 import com.video.editor.databinding.ViewTrimmerBinding
@@ -30,6 +31,7 @@ import com.video.editor.utils.UiThreadExecutor
 import com.video.editor.utils.Utility
 import com.video.editor.utils.VideoCommands
 import java.io.File
+import java.io.FileOutputStream
 import java.lang.ref.WeakReference
 import java.util.Calendar
 
@@ -155,12 +157,62 @@ class VideoTrimmer @JvmOverloads constructor(
         notifyProgressUpdate(false)
     }
 
-    fun setTrimRange(inputPath: String, outputPath: String, startTime: Long, endTime: Long) {
-        val startTimeFormatted = convertTimestampToString(startTime)
-        val endTimeFormatted = convertTimestampToString(endTime)
-        val command = arrayOf("-y", "-i", inputPath, "-ss", startTimeFormatted, "-to", endTimeFormatted, "-c", "copy", outputPath)
-        FFmpeg.execute(command)
+    fun copyUriToFile(context: Context, uri: Uri, file: File) {
+        context.contentResolver.openInputStream(uri)?.use { input ->
+            FileOutputStream(file).use { output ->
+                val buffer = ByteArray(4 * 1024) // buffer size
+                var read: Int
+                while (input.read(buffer).also { read = it } != -1) {
+                    output.write(buffer, 0, read)
+                }
+                output.flush()
+            }
+        }
     }
+
+    fun uriToFile(uri: Uri, context: Context): File? {
+        val tempFile = File.createTempFile("temp", null, context.cacheDir).apply {
+            deleteOnExit()  // Delete the file when the VM exits
+        }
+        context.contentResolver.openInputStream(uri)?.use { input ->
+            FileOutputStream(tempFile).use { output ->
+                input.copyTo(output)
+            }
+        }
+        return tempFile
+    }
+
+    fun setTrimRange(inputUri: Uri, outputFilePath: String, startTime: Long, endTime: Long) {
+        val inputFile = uriToFile(inputUri, context)  // Assume `context` is available
+        if (inputFile != null) {
+            val startSeconds = startTime / 1000.0
+            val endSeconds = endTime / 1000.0
+            val duration = endSeconds - startSeconds
+
+            // Formulate the FFmpeg command
+            val command = "-i ${inputFile.absolutePath} -ss $startSeconds -t $duration -c copy $outputFilePath"
+
+            // Execute the FFmpeg command
+            val rc = FFmpeg.execute(command)
+
+            if (rc == 0) {
+                // Command execution completed successfully.
+                Log.i(Config.TAG, "Command execution completed successfully.")
+            } else {
+                // Command execution failed.
+                Log.i(Config.TAG, String.format("Command execution failed with rc=%d and the output below.", rc))
+                Config.printLastCommandOutput(Log.INFO)
+            }
+        } else {
+            Log.e(Config.TAG, "Failed to create temporary file from Uri")
+        }
+    }
+
+
+
+
+
+
 
     private fun convertTimestampToString(timeInMs: Long): String {
         val totalSeconds = (timeInMs / 1000).toInt()
