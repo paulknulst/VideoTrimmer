@@ -163,7 +163,7 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
                     val uri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues)
 
                     uri?.let {
-                        val outputFilePath = getExternalOutputFilePath("output_video_0.mp4")
+                        val outputFilePath = getExternalOutputFilePath("output_video_${i}.mp4")
                         binding.videoTrimmer.setTrimRange(
                             videoUri,
                             outputFilePath,
@@ -180,9 +180,6 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
                 if (remainingTime > 0) {
                     val startTime = numberOfSegments * segmentDuration
                     //video duration is the same as endTime
-
-                    val newFile = copyUriToFile(this, videoUri, File(filesDir, "temp_video.mp4"))
-                    val outputPath = File(filesDir, "output_video.mp4").absolutePath
                     val contentValues = ContentValues().apply {
                         put(MediaStore.MediaColumns.DISPLAY_NAME, "trimmed_video.mp4")
                         put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4")
@@ -192,7 +189,7 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
                     val uri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues)
 
                     uri?.let {
-                        val outputFilePath = getExternalOutputFilePath("output_video_0.mp4")
+                        val outputFilePath = getExternalOutputFilePath("output_video_${numberOfSegments}_remainder.mp4")
                         binding.videoTrimmer.setTrimRange(
                             videoUri,
                             outputFilePath,

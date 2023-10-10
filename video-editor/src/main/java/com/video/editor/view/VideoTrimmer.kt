@@ -5,6 +5,7 @@ import android.media.MediaExtractor
 import android.media.MediaFormat
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
+import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Environment
 import android.os.Handler
@@ -196,6 +197,13 @@ class VideoTrimmer @JvmOverloads constructor(
             val rc = FFmpeg.execute(command)
 
             if (rc == 0) {
+                MediaScannerConnection.scanFile(
+                    context,
+                    arrayOf(outputFilePath),
+                    arrayOf("video/mp4")
+                ) { path, uri ->
+                    // Optionally handle the uri of the newly scanned file.
+                }
                 // Command execution completed successfully.
                 Log.i(Config.TAG, "Command execution completed successfully.")
             } else {
