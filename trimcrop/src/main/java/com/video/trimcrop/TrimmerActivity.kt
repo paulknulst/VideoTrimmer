@@ -33,7 +33,7 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
 
     private fun getExternalOutputFilePath(fileName: String): String {
         val moviesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)
-        val appDir = File(moviesDir, "MyApp") // replace "MyApp" with your app's name
+        val appDir = File(moviesDir, "AutoTrim") // replace "MyApp" with your app's name
         appDir.mkdirs()
         val outputFile = File(appDir, fileName)
         return outputFile.absolutePath
@@ -179,7 +179,7 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
                             videoUri,
                             outputFilePath,
                             startTime.toLong(),
-                            videoDuration.toLong()
+                            videoDuration
                         )
                     }
                 }
