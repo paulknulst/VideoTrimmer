@@ -9,6 +9,7 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
@@ -170,17 +171,29 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
                     rewardedInterstitialAd.fullScreenContentCallback =
                         object : FullScreenContentCallback() {
                             override fun onAdDismissedFullScreenContent() {
-                                // Continue with the save operation after the ad is dismissed
-                                //proceedWithSaveOperation()
+                                // Display a toast message when the ad is dismissed
+                                Toast.makeText(
+                                    this@TrimmerActivity,
+                                    "You need to watch the ad to trim the video",
+                                    Toast.LENGTH_LONG
+                                ).show()
                             }
 
-//                        override fun onAdFailedToShowFullScreenContent(adError: AdError?) {
-//                            // Handle the error and continue with the save operation
-//                            //proceedWithSaveOperation()
-//                        }
+                            override fun onAdFailedToShowFullScreenContent(p0: AdError) {
+                                // Display a toast message when the ad fails to show
+                                Toast.makeText(
+                                    this@TrimmerActivity,
+                                    "You must watch an ad to trim the video",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
 
                             override fun onAdShowedFullScreenContent() {
-                                // Ad is being shown
+                                Toast.makeText(
+                                    this@TrimmerActivity,
+                                    "Video trimming will start after the ad",
+                                    Toast.LENGTH_LONG
+                                ).show()
                             }
                         }
                     rewardedInterstitialAd.show(this) { rewardItem ->
