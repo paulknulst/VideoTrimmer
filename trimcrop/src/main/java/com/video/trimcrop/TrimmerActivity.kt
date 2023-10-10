@@ -1,7 +1,6 @@
 package com.video.trimcrop
 
 import android.content.ContentValues
-import android.content.Context
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
@@ -31,22 +30,8 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
 
     private val resolver by lazy { contentResolver }
 
-    fun copyUriToFile(context: Context, uri: Uri, file: File): File {
-        context.contentResolver.openInputStream(uri)?.use { input ->
-            FileOutputStream(file).use { output ->
-                val buffer = ByteArray(4 * 1024) // buffer size
-                var read: Int
-                while (input.read(buffer).also { read = it } != -1) {
-                    output.write(buffer, 0, read)
-                }
-                output.flush()
-            }
-        }
-        return file
-    }
 
-
-    fun getExternalOutputFilePath(fileName: String): String {
+    private fun getExternalOutputFilePath(fileName: String): String {
         val moviesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)
         val appDir = File(moviesDir, "MyApp") // replace "MyApp" with your app's name
         appDir.mkdirs()
@@ -151,19 +136,17 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
                         )
                     )
 
-                    val itemUri = Uri.parse(path)
-                    val newFile = copyUriToFile(this, videoUri, File(filesDir, "temp_video.mp4"))
-                    val outputPath = File(filesDir, "output_video.mp4").absolutePath
                     val contentValues = ContentValues().apply {
                         put(MediaStore.MediaColumns.DISPLAY_NAME, "trimmed_video.mp4")
                         put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4")
                         put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_MOVIES)
                     }
-
+                    val videoFile = File(path)
+                    val originalVideoName = videoFile.nameWithoutExtension
                     val uri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues)
 
                     uri?.let {
-                        val outputFilePath = getExternalOutputFilePath("output_video_${i}.mp4")
+                        val outputFilePath = getExternalOutputFilePath("$originalVideoName${i}.mp4")
                         binding.videoTrimmer.setTrimRange(
                             videoUri,
                             outputFilePath,
@@ -187,9 +170,11 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
                     }
 
                     val uri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues)
+                    val videoFile = File(path)
+                    val originalVideoName = videoFile.nameWithoutExtension
 
                     uri?.let {
-                        val outputFilePath = getExternalOutputFilePath("output_video_${numberOfSegments}_remainder.mp4")
+                        val outputFilePath = getExternalOutputFilePath("$originalVideoName${numberOfSegments}_remainder.mp4")
                         binding.videoTrimmer.setTrimRange(
                             videoUri,
                             outputFilePath,
