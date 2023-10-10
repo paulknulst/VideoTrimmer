@@ -10,16 +10,16 @@ import com.google.android.gms.ads.MobileAds
 import com.video.trimcrop.databinding.ActivityMainBinding
 
 class MainActivity : PermActivity() {
-    private lateinit var binding: ActivityMainBinding
+    private var binding: ActivityMainBinding? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Initialize the binding class
         binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        setContentView(binding?.root)
 
         // Access views via the binding class
-        binding.trimmerButton.setOnClickListener { pickFromGallery(REQUEST_VIDEO_TRIMMER) }
+        binding?.trimmerButton?.setOnClickListener { pickFromGallery(REQUEST_VIDEO_TRIMMER) }
 
         MobileAds.initialize(this) {}
     }

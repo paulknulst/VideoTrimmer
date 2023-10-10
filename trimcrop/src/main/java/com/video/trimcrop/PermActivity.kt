@@ -2,6 +2,7 @@ package com.video.trimcrop
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -9,22 +10,33 @@ import androidx.core.content.ContextCompat
 abstract class PermActivity : AppCompatActivity() {
 
     lateinit var doThis: () -> Unit
+
     protected fun setupPermissions(doSomething: () -> Unit) {
-        val writePermission =
-            ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-        val readPermission =
-            ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
         doThis = doSomething
-        if (writePermission != PackageManager.PERMISSION_GRANTED && readPermission != PackageManager.PERMISSION_GRANTED) {
+        val permissionsToRequest = mutableListOf<String>()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (ContextCompat.checkSelfPermission(this, "android.permission.READ_MEDIA_VIDEO") != PackageManager.PERMISSION_GRANTED) {
+                permissionsToRequest.add("android.permission.READ_MEDIA_VIDEO")
+            }
+        } else {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                permissionsToRequest.add(Manifest.permission.READ_EXTERNAL_STORAGE)
+            }
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                permissionsToRequest.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            }
+        }
+
+        if (permissionsToRequest.isNotEmpty()) {
             ActivityCompat.requestPermissions(
                 this,
-                arrayOf(
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                ),
+                permissionsToRequest.toTypedArray(),
                 101
             )
-        } else doThis()
+        } else {
+            doThis()
+        }
     }
 
     override fun onRequestPermissionsResult(
@@ -34,13 +46,18 @@ abstract class PermActivity : AppCompatActivity() {
     ) {
         when (requestCode) {
             101 -> {
-                if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                val allPermissionsGranted = grantResults.all { it == PackageManager.PERMISSION_GRANTED }
+                if (!allPermissionsGranted) {
                     PermissionsDialog(
                         this@PermActivity,
                         "Give Permissions"
                     ).show()
-                } else doThis()
+                } else {
+                    doThis()
+                }
             }
         }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
+
 }

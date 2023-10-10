@@ -12,20 +12,20 @@ import com.video.trimcrop.databinding.DialogPermissionsBinding
 
 class PermissionsDialog(var ctx: Context, var msg: String) : Dialog(ctx) {
 
-    private lateinit var binding: DialogPermissionsBinding
+    private var binding: DialogPermissionsBinding? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.dialog_permissions)
 
         window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
-        binding.message.text = msg
+        binding?.message?.text = msg
 
-        binding.dismiss.setOnClickListener {
+        binding?.dismiss?.setOnClickListener {
             dismiss()
         }
 
-        binding.settings.setOnClickListener {
+        binding?.settings?.setOnClickListener {
             val i = Intent(
                 Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
                 Uri.parse("package:" + BuildConfig.APPLICATION_ID)
