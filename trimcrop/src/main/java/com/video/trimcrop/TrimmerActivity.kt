@@ -229,7 +229,7 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
 
     override fun onVideoPrepared() {
         RunOnUiThread(this).safely {
-            Toast.makeText(this, "onVideoPrepared", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Ready to start", Toast.LENGTH_SHORT).show()
         }
     }
 }
