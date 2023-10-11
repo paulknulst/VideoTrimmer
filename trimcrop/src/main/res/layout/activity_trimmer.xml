@@ -69,6 +69,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Saving Video..."
+                android:textColor="@color/white"
                 android:layout_marginBottom="@dimen/_10sdp"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 

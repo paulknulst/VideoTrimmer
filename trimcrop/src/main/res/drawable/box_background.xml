@@ -1,9 +1,6 @@
 <!-- res/drawable/box_background.xml -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    <solid android:color="#ffffff" />
+    <solid android:color="@color/grey" />
     <corners android:radius="8dp" />
-    <stroke
-        android:width="2dp"
-        android:color="#cccccc" />
 </shape>

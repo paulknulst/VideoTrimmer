@@ -3,8 +3,10 @@
     <color name="colorPrimary">#000000</color>
     <color name="colorPrimaryDark">#000000</color>
     <color name="colorAccent">#000000</color>
-    <color name="buttonColor">#8C45BF</color>
-    <color name="backgroundColor">#000</color>
-    <color name="white">#FFF</color>
+    <color name="secondary">#04f3bc</color>
+    <color name="buttonColor">#00a5fe</color>
+    <color name="backgroundColor">#1b1f4f</color>
+    <color name="grey">#525252</color>
+    <color name="white">#EFEDED</color>
     <color name="textColor">#FFF</color>
 </resources>
