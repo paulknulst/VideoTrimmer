@@ -18,9 +18,9 @@
             android:layout_width="@dimen/_40sdp"
             android:layout_height="@dimen/_40sdp"
             android:layout_alignParentStart="true"
-            android:foregroundGravity="center"
             android:clickable="true"
-            android:focusable="true">  <!-- Add this line -->
+            android:focusable="true"
+            android:foregroundGravity="center">  <!-- Add this line -->
 
             <ImageView
                 android:layout_width="@dimen/_20sdp"
@@ -35,21 +35,54 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
+            android:clickable="true"
+            android:focusable="true"
             android:padding="@dimen/_10sdp"
             android:text="SAVE"
             android:textAllCaps="true"
             android:textColor="@color/buttonColor"
-            android:textSize="@dimen/_13sdp"
-            android:clickable="true"
-            android:focusable="true" />  <!-- Add this line -->
+            android:textSize="@dimen/_13sdp" />  <!-- Add this line -->
 
     </RelativeLayout>
 
-    <com.video.editor.view.VideoTrimmer
-        android:id="@+id/videoTrimmer"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/header"/>
+        android:layout_below="@+id/header">
+
+        <com.video.editor.view.VideoTrimmer
+            android:id="@+id/videoTrimmer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@drawable/box_background"
+            android:orientation="vertical"
+            android:paddingHorizontal="@dimen/_80sdp"
+            android:paddingVertical="@dimen/_19sdp"
+            >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Saving Video..."
+                android:layout_marginBottom="@dimen/_10sdp"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <ProgressBar
+                android:id="@+id/progress_bar"
+                style="@android:style/Widget.ProgressBar.Horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:progress="25"
+                android:visibility="visible" />
+
+        </LinearLayout>
+    </FrameLayout>
+
 
 </RelativeLayout>
 

@@ -44,7 +44,6 @@ class VideoTrimmer @JvmOverloads constructor(
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
     private val binding = ViewTrimmerBinding.inflate(LayoutInflater.from(context), this, true)
-
     companion object {
         private const val MIN_TIME_FRAME = 1000
         private const val SHOW_PROGRESS = 2
