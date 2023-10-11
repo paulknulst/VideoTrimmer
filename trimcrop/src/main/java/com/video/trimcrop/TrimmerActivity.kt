@@ -22,7 +22,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.io.FileOutputStream
 
 class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
 
@@ -93,7 +92,10 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
                             val contentValues = ContentValues().apply {
                                 put(MediaStore.MediaColumns.DISPLAY_NAME, "segment_$i.mp4")
                                 put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4")
-                                put(MediaStore.MediaColumns.RELATIVE_PATH, "${Environment.DIRECTORY_MOVIES}/TrimCrop")
+                                put(
+                                    MediaStore.MediaColumns.RELATIVE_PATH,
+                                    "${Environment.DIRECTORY_MOVIES}/TrimCrop"
+                                )
                             }
 
                             val uri = resolver.insert(
@@ -144,13 +146,13 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
                                 )
                             }
                         }
-//                    Toast.makeText(
-//                        this@TrimmerActivity,
-//                        "Video Saved!",
-//                        Toast.LENGTH_SHORT
-//                    ).show()
                     }
                 }
+                Toast.makeText(
+                    this@TrimmerActivity,
+                    "Video Saved!",
+                    Toast.LENGTH_LONG
+                ).show()
             }
 
 
@@ -203,7 +205,7 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
                         // Now you could proceed with the save operation
                         beginVideoTrimming()
                     }
-                }else{
+                } else {
                     beginVideoTrimming() //Will start if Ad fails to load
                 }
             }
