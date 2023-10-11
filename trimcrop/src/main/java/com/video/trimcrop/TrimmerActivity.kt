@@ -1,7 +1,5 @@
 package com.video.trimcrop
 
-import android.R
-import android.app.ActionBar
 import android.content.ContentValues
 import android.media.MediaMetadataRetriever
 import android.net.Uri
@@ -9,10 +7,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
-import android.view.Gravity
-import android.view.View
-import android.view.ViewGroup
-import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import com.google.android.gms.ads.AdError
@@ -23,6 +17,10 @@ import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd
 import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAdLoadCallback
 import com.video.editor.interfaces.OnVideoListener
 import com.video.trimcrop.databinding.ActivityTrimmerBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 
@@ -82,82 +80,77 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
             }
 
             fun beginVideoTrimming() {
-//                progressBar.visibility = View.VISIBLE
-                val videoDuration = getVideoDuration(videoUri)
-                val segmentDuration = segmentLengthInSeconds * 1000
-                val numberOfSegments = (videoDuration / segmentDuration).toInt()
+                CoroutineScope(Dispatchers.IO).launch {
+                    val videoDuration = getVideoDuration(videoUri)
+                    val segmentDuration = segmentLengthInSeconds * 1000
+                    val numberOfSegments = (videoDuration / segmentDuration).toInt()
 
-                for (i in 0 until numberOfSegments) {
-                    val startTime = i * segmentDuration
-                    val endTime = startTime + segmentDuration
-                    val outputStream = FileOutputStream(
-                        File(
-                            Environment.getExternalStorageDirectory(),
-                            "TrimCrop${File.separator}segment_$i.mp4"
-                        )
-                    )
+                    withContext(Dispatchers.IO) {
+                        for (i in 0 until numberOfSegments) {
+                            val startTime = i * segmentDuration
+                            val endTime = startTime + segmentDuration
 
-                    val contentValues = ContentValues().apply {
-                        put(MediaStore.MediaColumns.DISPLAY_NAME, "trimmed_video.mp4")
-                        put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4")
-                        put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_MOVIES)
+                            val contentValues = ContentValues().apply {
+                                put(MediaStore.MediaColumns.DISPLAY_NAME, "segment_$i.mp4")
+                                put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4")
+                                put(MediaStore.MediaColumns.RELATIVE_PATH, "${Environment.DIRECTORY_MOVIES}/TrimCrop")
+                            }
+
+                            val uri = resolver.insert(
+                                MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                                contentValues
+                            )
+
+                            uri?.let {
+                                val outputFilePath = getExternalOutputFilePath("segment_$i.mp4")
+                                binding.videoTrimmer.setTrimRange(
+                                    videoUri,
+                                    outputFilePath,
+                                    startTime.toLong(),
+                                    endTime.toLong()
+                                )
+                            }
+                        }
+
+                        // Check if there is any remaining time that needs to be saved
+                        val remainingTime = videoDuration - (numberOfSegments * segmentDuration)
+                        if (remainingTime > 0) {
+                            val startTime = numberOfSegments * segmentDuration
+                            //video duration is the same as endTime
+                            val contentValues = ContentValues().apply {
+                                put(MediaStore.MediaColumns.DISPLAY_NAME, "trimmed_video.mp4")
+                                put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4")
+                                put(
+                                    MediaStore.MediaColumns.RELATIVE_PATH,
+                                    Environment.DIRECTORY_MOVIES
+                                )
+                            }
+
+                            val uri = resolver.insert(
+                                MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                                contentValues
+                            )
+                            val videoFile = File(path)
+                            val originalVideoName = videoFile.nameWithoutExtension
+
+                            uri?.let {
+                                val outputFilePath =
+                                    getExternalOutputFilePath("$originalVideoName${numberOfSegments}_remainder.mp4")
+                                binding.videoTrimmer.setTrimRange(
+                                    videoUri,
+                                    outputFilePath,
+                                    startTime.toLong(),
+                                    videoDuration
+                                )
+                            }
+                        }
+//                    Toast.makeText(
+//                        this@TrimmerActivity,
+//                        "Video Saved!",
+//                        Toast.LENGTH_SHORT
+//                    ).show()
                     }
-                    val videoFile = File(path)
-                    val originalVideoName = videoFile.nameWithoutExtension
-                    val uri = resolver.insert(
-                        MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-                        contentValues
-                    )
-
-                    uri?.let {
-                        val outputFilePath =
-                            getExternalOutputFilePath("$originalVideoName${i}.mp4")
-                        binding.videoTrimmer.setTrimRange(
-                            videoUri,
-                            outputFilePath,
-                            startTime.toLong(),
-                            endTime.toLong()
-                        )
-                    }
-
-                    outputStream.close()
-//                    progressBar.visibility = View.GONE
                 }
-
-                // Check if there is any remaining time that needs to be saved
-                val remainingTime = videoDuration - (numberOfSegments * segmentDuration)
-                if (remainingTime > 0) {
-                    val startTime = numberOfSegments * segmentDuration
-                    //video duration is the same as endTime
-                    val contentValues = ContentValues().apply {
-                        put(MediaStore.MediaColumns.DISPLAY_NAME, "trimmed_video.mp4")
-                        put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4")
-                        put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_MOVIES)
-                    }
-
-                    val uri = resolver.insert(
-                        MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-                        contentValues
-                    )
-                    val videoFile = File(path)
-                    val originalVideoName = videoFile.nameWithoutExtension
-
-                    uri?.let {
-                        val outputFilePath =
-                            getExternalOutputFilePath("$originalVideoName${numberOfSegments}_remainder.mp4")
-                        binding.videoTrimmer.setTrimRange(
-                            videoUri,
-                            outputFilePath,
-                            startTime.toLong(),
-                            videoDuration
-                        )
-                    }
-                }
-                Toast.makeText(
-                    this@TrimmerActivity,
-                    "Video Saved!",
-                    Toast.LENGTH_SHORT
-                ).show()
             }
 
 
