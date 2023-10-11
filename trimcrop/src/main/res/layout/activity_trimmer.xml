@@ -56,6 +56,7 @@
             android:layout_height="match_parent" />
 
         <LinearLayout
+            android:id="@+id/progress_dialog"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -63,6 +64,7 @@
             android:orientation="vertical"
             android:paddingHorizontal="@dimen/_80sdp"
             android:paddingVertical="@dimen/_19sdp"
+            android:visibility="gone"
             >
 
             <TextView
@@ -78,8 +80,7 @@
                 style="@android:style/Widget.ProgressBar.Horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:progress="25"
-                android:visibility="visible" />
+                android:progress="0" />
 
         </LinearLayout>
     </FrameLayout>

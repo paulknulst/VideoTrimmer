@@ -7,6 +7,9 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
+import android.view.View
+import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import com.google.android.gms.ads.AdError
@@ -43,11 +46,16 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
         return outputFile.absolutePath
     }
 
+    fun showLoading(show: Boolean) {
+        binding.progressBar.visibility = if (show) View.VISIBLE else View.GONE
+    }
+
 
     @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)  // This is correct
+        val progressDialog = findViewById<LinearLayout>(R.id.progress_dialog)
 
         val videoUriString = intent.getStringExtra(MainActivity.EXTRA_VIDEO_URI)
         val videoUri = Uri.parse(videoUriString)
@@ -84,6 +92,12 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
                     val segmentDuration = segmentLengthInSeconds * 1000
                     val numberOfSegments = (videoDuration / segmentDuration).toInt()
 
+                    // Initialize ProgressBar
+                    val progressBar = findViewById<ProgressBar>(R.id.progress_bar)
+
+//                    linearLayout.visibility = View.VISIBLE
+                    progressBar.max = numberOfSegments
+
                     withContext(Dispatchers.IO) {
                         for (i in 0 until numberOfSegments) {
                             val startTime = i * segmentDuration
@@ -111,6 +125,9 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
                                     startTime.toLong(),
                                     endTime.toLong()
                                 )
+                            }
+                            withContext(Dispatchers.Main) {
+                                progressBar.progress = i + 1
                             }
                         }
 
@@ -147,12 +164,16 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
                             }
                         }
                     }
+
+                    withContext(Dispatchers.Main) {
+                        progressDialog.visibility = View.GONE
+                        Toast.makeText(
+                            this@TrimmerActivity,
+                            "Video Saved!",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
                 }
-                Toast.makeText(
-                    this@TrimmerActivity,
-                    "Video Saved!",
-                    Toast.LENGTH_LONG
-                ).show()
             }
 
 
@@ -173,7 +194,7 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
             }
 
             binding.save.setOnClickListener {
-                println("TrimmerActivity onSave Called")
+                progressDialog.visibility = View.VISIBLE
                 if (::rewardedInterstitialAd.isInitialized) {
                     rewardedInterstitialAd.fullScreenContentCallback =
                         object : FullScreenContentCallback() {
