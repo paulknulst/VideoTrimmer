@@ -161,7 +161,6 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
                 )
 
             binding.back.setOnClickListener {
-                println("Back button pressed")
                 binding.videoTrimmer.cancel()
             }
 
@@ -170,22 +169,14 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
                 if (::rewardedInterstitialAd.isInitialized) {
                     rewardedInterstitialAd.fullScreenContentCallback =
                         object : FullScreenContentCallback() {
-                            override fun onAdDismissedFullScreenContent() {
-                                // Display a toast message when the ad is dismissed
-                                Toast.makeText(
-                                    this@TrimmerActivity,
-                                    "You need to watch the ad to trim the video",
-                                    Toast.LENGTH_LONG
-                                ).show()
-                            }
-
                             override fun onAdFailedToShowFullScreenContent(p0: AdError) {
                                 // Display a toast message when the ad fails to show
                                 Toast.makeText(
                                     this@TrimmerActivity,
-                                    "You must watch an ad to trim the video",
+                                    "Error loading Ad $p0",
                                     Toast.LENGTH_LONG
                                 ).show()
+                                beginVideoTrimming() //Will start video trimming if Ad fails to load
                             }
 
                             override fun onAdShowedFullScreenContent() {
