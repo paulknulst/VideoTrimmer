@@ -1,5 +1,7 @@
 package com.video.trimcrop
 
+import android.R
+import android.app.ActionBar
 import android.content.ContentValues
 import android.media.MediaMetadataRetriever
 import android.net.Uri
@@ -7,6 +9,10 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
+import android.view.Gravity
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import com.google.android.gms.ads.AdError
@@ -76,6 +82,7 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
             }
 
             fun beginVideoTrimming() {
+//                progressBar.visibility = View.VISIBLE
                 val videoDuration = getVideoDuration(videoUri)
                 val segmentDuration = segmentLengthInSeconds * 1000
                 val numberOfSegments = (videoDuration / segmentDuration).toInt()
@@ -114,6 +121,7 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
                     }
 
                     outputStream.close()
+//                    progressBar.visibility = View.GONE
                 }
 
                 // Check if there is any remaining time that needs to be saved
@@ -145,6 +153,11 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
                         )
                     }
                 }
+                Toast.makeText(
+                    this@TrimmerActivity,
+                    "Video Saved!",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
 
 
@@ -174,7 +187,7 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
                                 Toast.makeText(
                                     this@TrimmerActivity,
                                     "Error loading Ad $p0",
-                                    Toast.LENGTH_LONG
+                                    Toast.LENGTH_SHORT
                                 ).show()
                                 beginVideoTrimming() //Will start video trimming if Ad fails to load
                             }
@@ -183,7 +196,7 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
                                 Toast.makeText(
                                     this@TrimmerActivity,
                                     "Video trimming will start after the ad",
-                                    Toast.LENGTH_LONG
+                                    Toast.LENGTH_SHORT
                                 ).show()
                             }
                         }
@@ -197,9 +210,10 @@ class TrimmerActivity : BaseCommandActivity(), OnVideoListener {
                         // Now you could proceed with the save operation
                         beginVideoTrimming()
                     }
+                }else{
+                    beginVideoTrimming() //Will start if Ad fails to load
                 }
             }
-
         }
     }
 
