@@ -36,7 +36,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:background="#000">
+        >
 
         <RelativeLayout
             android:id="@+id/timeFrame"
@@ -66,7 +66,6 @@
         </RelativeLayout>
 
         <RelativeLayout
-            android:background="#000"
             android:id="@+id/timeLineFrame"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -77,7 +76,6 @@
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@android:color/black"
                 android:paddingTop="@dimen/_5sdp"
                 android:paddingBottom="@dimen/_5sdp">
 
@@ -101,7 +99,7 @@
                 android:progressDrawable="@android:color/transparent"
                 android:secondaryProgress="0"
                 android:thumb="@drawable/seek_line"
-                android:visibility="gone" />
+                android:visibility="visible" />
 
             <com.video.editor.view.RangeSeekBarView
                 android:id="@+id/timeLineBar"

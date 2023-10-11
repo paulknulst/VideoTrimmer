@@ -80,15 +80,12 @@ class VideoPreviewView @JvmOverloads constructor(
                     }
                     val cropWidth = viewWidth / threshold
                     val interval = videoLengthInMs?.div(numThumbs)
-                    println("videoLengthInMs: $videoLengthInMs, frameWidth: $frameWidth, numThumbs: $numThumbs, interval: $interval")
                     for (i in 0 until numThumbs) {
-                        println("Entering for loop, iteration: $i")
                         val bitmap = mediaMetadataRetriever.getFrameAtTime(
                             i * interval!!,
                             MediaMetadataRetriever.OPTION_CLOSEST_SYNC
                         )
                         bitmap?.let {
-                            println("Bitmap is not null for iteration: $i")
                             var newBitmap: Bitmap
                             try {
                                 newBitmap = Bitmap.createScaledBitmap(
@@ -109,7 +106,7 @@ class VideoPreviewView @JvmOverloads constructor(
                                 return@let  // Skip to next iteration if an error occurs
                             }
                             thumbnails.put(i.toLong(), newBitmap)
-                        } ?: println("Bitmap is null for iteration: $i")
+                        }
                     }
                     mediaMetadataRetriever.release()
                     returnBitmaps(thumbnails)
@@ -122,24 +119,20 @@ class VideoPreviewView @JvmOverloads constructor(
     }
 
     private fun returnBitmaps(thumbnailList: LongSparseArray<Bitmap>) {
-        println("returnBitmaps called, thumbnailList size: ${thumbnailList.size()}")
         UiThreadExecutor.runTask("", {
             bitmaps = thumbnailList
-            println("bitmaps updated, bitmaps size: ${bitmaps?.size() ?: 0}")
             invalidate()
         }, 0L)
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        println("onDraw called, bitmaps size: ${bitmaps?.size() ?: 0}")
         if (bitmaps != null) {
             canvas.save()
             var x = 0
             for (i in 0 until (bitmaps?.size() ?: 0)) {
                 val bitmap = bitmaps?.get(i.toLong())
                 if (bitmap != null) {
-                    println("Drawing bitmap at index: $i")
                     canvas.drawBitmap(bitmap, x.toFloat(), 0f, null)
                     x += bitmap.width
                 }
@@ -149,7 +142,6 @@ class VideoPreviewView @JvmOverloads constructor(
     }
 
     fun setVideo(data: Uri) {
-        println("setVideo was called on instance ${this.hashCode()} with this uri: $data and here is ${data.path}")
         videoUri = data
         createPreview(width)
         postInvalidate()  // Request a redraw
